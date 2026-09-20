@@ -1,0 +1,1 @@
+- [Website redesign scope](website-scope.md) — retain official transaction services; distinguish concept imagery from actual property photography.

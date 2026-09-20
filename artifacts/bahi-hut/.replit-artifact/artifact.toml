@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Bahi Hut & Golden Host"
+description = "A modern tropical website connecting the historic Bahi Hut tiki bar, Golden Host Resort, events, venue rental, and merchandise."
+version = "1.0.0"
+id = "artifacts/bahi-hut"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23587
+
+[services.development]
+run = "pnpm --filter @workspace/bahi-hut run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bahi-hut", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/bahi-hut/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23587"
+BASE_PATH = "/"
