@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Calendar, GlassWater } from 'lucide-react';
@@ -6,16 +7,52 @@ import poolImg from '@assets/generated_images/resort-pool.jpg';
 import maiTaiImg from '@assets/generated_images/mai-tai.jpg';
 
 export default function Home() {
+  const heroBackgroundRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const background = heroBackgroundRef.current;
+    if (!background || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    let frame = 0;
+    const updateParallax = () => {
+      frame = 0;
+      const offset = Math.min(Math.max(window.scrollY * 0.16, 0), 96);
+      background.style.transform = `translate3d(0, ${offset}px, 0) scale(1.08)`;
+    };
+    const handleScroll = () => {
+      if (!frame) {
+        frame = window.requestAnimationFrame(updateParallax);
+      }
+    };
+
+    updateParallax();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+    };
+  }, []);
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-secondary">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={heroImg} 
-            alt="Bahi Hut Exterior" 
-            className="w-full h-full object-cover opacity-60 mix-blend-overlay"
-          />
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <div
+            ref={heroBackgroundRef}
+            className="hero-parallax-bg absolute inset-0"
+            style={{ transform: 'translate3d(0, 0, 0) scale(1.08)' }}
+          >
+            <img 
+              src={heroImg} 
+              alt="Bahi Hut Exterior" 
+              className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+            />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/50 to-transparent" />
         </div>
         

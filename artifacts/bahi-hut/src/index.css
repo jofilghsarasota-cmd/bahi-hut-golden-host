@@ -161,3 +161,15 @@
     @apply font-serif;
   }
 }
+
+.hero-parallax-bg {
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-parallax-bg {
+    transform: none !important;
+    will-change: auto;
+  }
+}
