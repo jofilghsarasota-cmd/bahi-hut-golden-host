@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, X, Palmtree, MapPin, Calendar, ShoppingBag, GlassWater, BedDouble, Info, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import logoImg from '@assets/generated_images/logo/BAHI_HUT_LOGO.jpg';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,20 +25,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-background selection:bg-primary/20 selection:text-foreground">
-      {/* Top Banner */}
-      <div className="bg-secondary text-secondary-foreground py-2 px-4 text-center text-sm font-medium tracking-wide">
-        Sarasota's Historic Tiki Escape Since 1954 🌺
-      </div>
-
       {/* Navigation */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container mx-auto px-4 lg:px-8 flex h-20 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            <Palmtree className="h-8 w-8 text-primary" />
-            <div className="flex flex-col">
-              <span className="font-serif text-2xl font-black leading-none text-foreground tracking-tight">BAHI HUT</span>
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold leading-tight">Golden Host Resort</span>
-            </div>
+          <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
+            <img src={logoImg} alt="Bahi Hut Cocktail Lounge" className="h-16 w-16 rounded-full object-contain" />
           </Link>
 
           {/* Desktop Nav */}
@@ -108,9 +100,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             <div>
-              <Link href="/" className="flex items-center gap-2 mb-6">
-                <Palmtree className="h-8 w-8 text-primary" />
-                <span className="font-serif text-3xl font-black text-white">BAHI HUT</span>
+              <Link href="/" className="inline-flex items-center mb-6">
+                <img src={logoImg} alt="Bahi Hut Cocktail Lounge" className="h-28 w-28 rounded-full object-contain" />
               </Link>
               <p className="text-secondary-foreground/80 mb-6 max-w-sm">
                 Sarasota's oldest tiki bar and midcentury modern resort. Serving legendary Mai Tais since 1954.
