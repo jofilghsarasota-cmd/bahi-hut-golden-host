@@ -37,5 +37,7 @@ export function useHeaderState(overlayEnabled: boolean) {
     };
   }, [overlayEnabled]);
 
-  return state;
+  // The effect runs after paint, so on leaving home the stale `overlaid` would
+  // show one frame of white header text over the next page.
+  return { overlaid: overlayEnabled && state.overlaid, scrolled: state.scrolled };
 }

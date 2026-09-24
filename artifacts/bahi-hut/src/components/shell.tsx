@@ -11,9 +11,9 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useHeaderState } from '@/hooks/use-header-state';
-import { themeForPath } from '@/lib/page-theme';
+import { normalizePath, themeForPath } from '@/lib/page-theme';
 import { cn } from '@/lib/utils';
 import logoImg from '@assets/generated_images/logo/BAHI_HUT_LOGO.jpg';
 
@@ -46,10 +46,13 @@ function navLinkClass(active: boolean, overlaid: boolean) {
 export function Shell({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const theme = themeForPath(location);
-  const isHome = location === '/';
+  const path = normalizePath(location);
+  const theme = themeForPath(path);
+  const isHome = path === '/';
   const { overlaid, scrolled } = useHeaderState(isHome);
-  const moreActive = moreLinks.some((link) => link.href === location);
+  // Only the fixed home header compacts: shrinking a sticky one shifts the page.
+  const compact = isHome && scrolled;
+  const moreActive = moreLinks.some((link) => link.href === path);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -57,10 +60,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [location]);
 
   return (
-    // Themed too: it's what shows through the translucent header at the top.
-    <div data-theme={theme} className="min-h-screen flex flex-col font-sans bg-background selection:bg-primary/20 selection:text-foreground">
+    // Paints the page theme's surface, since it shows through the translucent
+    // header, but opens no theme scope: the lounge footer lives inside it.
+    <div className={cn('min-h-screen flex flex-col font-sans', theme === 'lounge' ? 'bg-koa' : 'bg-sand', 'selection:bg-primary/20 selection:text-foreground')}>
       {/* Fixed over the home hero (transparent until it scrolls past), sticky elsewhere. */}
       <header
+        // Remount between the home and page variants so their colors don't
+        // cross-fade (white overlay text fading out over a sand page).
+        key={isHome ? 'home' : 'page'}
         data-theme={theme}
         className={cn(
           'top-0 z-50 w-full border-b transition-[background-color,border-color,color] duration-300 motion-reduce:transition-none',
@@ -73,7 +80,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div
           className={cn(
             'container mx-auto flex items-center justify-between px-4 transition-[height] duration-300 motion-reduce:transition-none lg:px-8',
-            scrolled ? 'h-14' : 'h-16',
+            compact ? 'h-14' : 'h-16',
           )}
         >
           <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
@@ -82,7 +89,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               alt="Bahi Hut Cocktail Lounge"
               className={cn(
                 'rounded-full object-contain transition-[width,height] duration-300 motion-reduce:transition-none',
-                scrolled ? 'h-10 w-10' : 'h-12 w-12',
+                compact ? 'h-10 w-10' : 'h-12 w-12',
               )}
             />
           </Link>
@@ -93,8 +100,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <NavigationMenuList className="gap-1 space-x-0">
                 {primaryLinks.map((link) => (
                   <NavigationMenuItem key={link.href}>
-                    <NavigationMenuLink asChild active={location === link.href}>
-                      <Link href={link.href} className={navLinkClass(location === link.href, overlaid)}>
+                    <NavigationMenuLink asChild active={path === link.href}>
+                      <Link href={link.href} className={navLinkClass(path === link.href, overlaid)}>
                         {link.label}
                       </Link>
                     </NavigationMenuLink>
@@ -117,12 +124,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
                     <ul className="grid w-60 gap-1 p-2">
                       {moreLinks.map((link) => (
                         <li key={link.href}>
-                          <NavigationMenuLink asChild active={location === link.href}>
+                          <NavigationMenuLink asChild active={path === link.href}>
                             <Link
                               href={link.href}
                               className={cn(
                                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted focus:outline-none',
-                                location === link.href ? 'text-primary' : 'text-popover-foreground',
+                                path === link.href ? 'text-primary' : 'text-popover-foreground',
                               )}
                             >
                               <link.icon className="h-4 w-4 text-primary" />
@@ -162,31 +169,37 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 <SheetDescription className="sr-only">Site navigation</SheetDescription>
               </SheetHeader>
               <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-4">
+                {/* SheetClose, not the route effect: tapping the current page changes no route. */}
                 {mobileLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      'flex items-center gap-4 rounded-xl px-3 py-3 font-serif text-2xl font-semibold transition-colors',
-                      location === link.href ? 'bg-primary/15 text-primary' : 'text-foreground/85 hover:bg-muted',
-                    )}
-                  >
-                    <link.icon className="h-5 w-5 shrink-0" />
-                    {link.label}
-                  </Link>
+                  <SheetClose asChild key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        'flex items-center gap-4 rounded-xl px-3 py-3 font-serif text-2xl font-semibold transition-colors',
+                        path === link.href ? 'bg-primary/15 text-primary' : 'text-foreground/85 hover:bg-muted',
+                      )}
+                    >
+                      <link.icon className="h-5 w-5 shrink-0" />
+                      {link.label}
+                    </Link>
+                  </SheetClose>
                 ))}
               </nav>
               <div className="grid gap-3 border-t border-border p-6">
-                <Button asChild size="lg" className="w-full">
-                  <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
-                    Book a Room
-                  </a>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="w-full">
-                  <a href="tel:9413555141">
-                    <Phone /> (941) 355-5141
-                  </a>
-                </Button>
+                <SheetClose asChild>
+                  <Button asChild size="lg" className="w-full">
+                    <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                      Book a Room
+                    </a>
+                  </Button>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Button asChild size="lg" variant="outline" className="w-full">
+                    <a href="tel:9413555141">
+                      <Phone /> (941) 355-5141
+                    </a>
+                  </Button>
+                </SheetClose>
               </div>
             </SheetContent>
           </Sheet>
