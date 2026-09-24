@@ -7,8 +7,7 @@ export default function BahiHut() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <section className="bg-secondary pt-24 pb-32 text-center px-4 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/bamboo-texture.png')] mix-blend-overlay"></div>
+      <section className="grain bg-secondary pt-24 pb-32 text-center px-4 relative overflow-hidden">
         <div className="container relative z-10 max-w-4xl mx-auto">
           <h1 className="font-serif text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-md">
             The Bahi Hut
@@ -44,8 +43,8 @@ export default function BahiHut() {
                     <span className="font-medium text-foreground">1:00 PM - 12:00 AM</span>
                   </li>
                 </ul>
-                <div className="mt-4 p-4 bg-accent/20 rounded-xl border border-accent">
-                  <p className="text-sm font-bold text-accent-foreground text-center">
+                <div className="mt-4 p-4 rounded-xl border border-accent/60">
+                  <p className="text-sm font-bold text-accent text-center">
                     Happy Hour: Mon-Thu 1PM - 6PM
                   </p>
                 </div>
@@ -60,7 +59,7 @@ export default function BahiHut() {
                   4675 N Tamiami Trail<br />
                   Sarasota, FL 34234
                 </p>
-                <Button variant="outline" className="w-full rounded-xl" asChild>
+                <Button variant="outline" className="w-full" asChild>
                   <a href="https://maps.google.com/?q=4675+N+Tamiami+Trail+Sarasota+FL+34234" target="_blank" rel="noopener noreferrer">
                     Get Directions
                   </a>
@@ -74,7 +73,7 @@ export default function BahiHut() {
                 <p className="text-muted-foreground mb-4">
                   Hungry? Order delicious bites directly from our partner kitchen while you sip.
                 </p>
-                <Button className="w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90" asChild>
+                <Button className="w-full" asChild>
                   <a href="https://ghresort.square.site/#items" target="_blank" rel="noopener noreferrer">
                     View Food Menu
                   </a>
@@ -84,7 +83,7 @@ export default function BahiHut() {
 
             {/* Right Col - Story */}
             <div className="md:col-span-8 prose prose-lg prose-headings:font-serif prose-headings:text-foreground prose-p:text-muted-foreground max-w-none">
-              <h2 className="text-4xl font-bold mb-6 text-secondary">The Legend of the Sneaky Tiki</h2>
+              <h2 className="text-4xl font-bold mb-6 text-primary">The Legend of the Sneaky Tiki</h2>
               
               <div className="float-right w-64 ml-8 mb-4 rounded-xl overflow-hidden shadow-lg border-4 border-white transform rotate-2">
                 <img src={maiTaiImg} alt="Famous Bahi Hut Mai Tai" className="w-full h-auto" />
@@ -107,7 +106,7 @@ export default function BahiHut() {
               </p>
 
               <div className="bg-secondary/10 p-6 rounded-2xl border border-secondary/20 mt-8 not-prose">
-                <h4 className="font-serif text-xl font-bold text-secondary mb-2">Take the Hut Home</h4>
+                <h4 className="font-serif text-xl font-bold text-primary mb-2">Take the Hut Home</h4>
                 <p className="text-muted-foreground mb-4">Want a souvenir of your survival? We sell custom tiki mugs, including the famous Sneaky Tiki.</p>
                 <Button variant="outline" asChild>
                   <Link href="/shop">Shop Merch</Link>

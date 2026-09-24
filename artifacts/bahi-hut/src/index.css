@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400..700;1,400..700&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400..700;1,400..700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,100..900,0..100;1,9..144,100..900,0..100&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+/* `dark:` means "inside a lounge section" (and not re-opted into sun). */
+@custom-variant dark (&:where([data-theme='lounge'], [data-theme='lounge'] *):not(:where([data-theme='sun'], [data-theme='sun'] *)));
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -22,34 +23,34 @@
 
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-primary-border: var(--primary-border);
 
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-secondary-border: var(--secondary-border);
 
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-muted-border: var(--muted-border);
 
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-accent-border: var(--accent-border);
 
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-destructive-border: var(--destructive-border);
 
   --color-sidebar: hsl(var(--sidebar));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-primary: hsl(var(--sidebar-primary));
   --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-primary-border: var(--sidebar-primary-border);
   --color-sidebar-accent: hsl(var(--sidebar-accent));
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-accent-border: var(--sidebar-accent-border);
   --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* Brand palette. Torch follows the theme's primary; the rest are fixed. */
+  --color-koa: hsl(20 38% 7%);
+  --color-sand: hsl(40 45% 95%);
+  --color-torch: hsl(var(--primary));
+  --color-lagoon: hsl(177 56% 27%);
+  --color-bamboo: hsl(41 70% 61%);
 
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
@@ -61,115 +62,697 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* LIGHT MODE */
 :root {
-  --button-outline: rgba(0, 0, 0, 0.1);
-  --badge-outline: rgba(0, 0, 0, 0.05);
-
-  --opaque-button-border-intensity: -8;
-
-  --elevate-1: rgba(0, 0, 0, 0.03);
-  --elevate-2: rgba(0, 0, 0, 0.08);
-
-  /* Bahi Hut Palette */
-  /* Background: Soft Sand/Cream */
-  --background: 40 33% 96%;
-  --foreground: 20 20% 20%;
-  --border: 40 20% 85%;
-  
-  --card: 40 30% 98%;
-  --card-foreground: 20 20% 20%;
-  --card-border: 40 20% 90%;
-  
-  --popover: 40 33% 96%;
-  --popover-foreground: 20 20% 20%;
-  --popover-border: 40 20% 85%;
-
-  /* Primary: Vintage Orange/Coral */
-  --primary: 15 75% 55%;
-  --primary-foreground: 0 0% 100%;
-  
-  /* Secondary: Deep Midcentury Teal */
-  --secondary: 175 40% 30%;
-  --secondary-foreground: 0 0% 100%;
-  
-  /* Accent: Bamboo/Gold */
-  --accent: 40 60% 65%;
-  --accent-foreground: 20 20% 20%;
-
-  --muted: 40 30% 90%;
-  --muted-foreground: 30 20% 40%;
-  
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-
-  --input: 40 20% 85%;
-  --ring: 15 75% 55%;
-  
-  /* Sidebar uses secondary teal vibe */
-  --sidebar: 175 40% 30%;
-  --sidebar-foreground: 0 0% 100%;
-  --sidebar-border: 175 40% 25%;
-  --sidebar-primary: 15 75% 55%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 175 40% 25%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 15 75% 55%;
-
   --app-font-sans: 'DM Sans', sans-serif;
   --app-font-serif: 'Fraunces', serif;
   --app-font-mono: monospace;
   --radius: 0.75rem;
+
+  /* Sidebar (unused by the site, kept for the shadcn component). */
+  --sidebar: 177 56% 27%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-border: 177 56% 22%;
+  --sidebar-primary: 14 74% 43%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 177 56% 22%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 14 74% 43%;
 }
 
-.dark {
-  /* No dark mode preferred, but provide fallbacks just in case */
-  --background: 20 20% 15%;
-  --foreground: 40 33% 96%;
-  --border: 20 20% 25%;
-  --card: 20 20% 18%;
-  --card-foreground: 40 33% 96%;
-  --card-border: 20 20% 25%;
-  --popover: 20 20% 15%;
-  --popover-foreground: 40 33% 96%;
-  --popover-border: 20 20% 25%;
-  
-  --primary: 15 75% 55%;
+/* SUN: daytime resort. Sand, koa text, torch, lagoon, bamboo. */
+/* THEME:sun */
+:root,
+[data-theme='sun'] {
+  --background: 40 45% 95%;
+  --foreground: 20 35% 12%;
+  --border: 36 25% 82%;
+  --input: 36 25% 78%;
+  --ring: 14 74% 43%;
+
+  --card: 40 50% 98%;
+  --card-foreground: 20 35% 12%;
+  --card-border: 36 25% 86%;
+
+  --popover: 40 50% 98%;
+  --popover-foreground: 20 35% 12%;
+  --popover-border: 36 25% 82%;
+
+  --primary: 14 74% 43%;
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 175 40% 30%;
+  --secondary: 177 56% 27%;
   --secondary-foreground: 0 0% 100%;
-  
-  --accent: 40 60% 65%;
-  --accent-foreground: 20 20% 15%;
-  
-  --muted: 20 20% 25%;
-  --muted-foreground: 40 30% 70%;
-  
-  --input: 20 20% 25%;
-  --ring: 15 75% 55%;
+  --accent: 41 70% 61%;
+  --accent-foreground: 20 35% 12%;
+  --muted: 38 35% 88%;
+  --muted-foreground: 25 20% 36%;
+  --destructive: 0 72% 45%;
+  --destructive-foreground: 0 0% 100%;
+
+  --glow: 0 10px 28px -12px hsl(20 40% 20% / 0.45);
+  --card-shadow: 0 1px 2px hsl(20 40% 20% / 0.06), 0 14px 34px -18px hsl(20 40% 20% / 0.22);
+  color-scheme: light;
 }
+/* END THEME */
+
+/* LOUNGE: after dark. Koa wood, cream text, lit torch, amber. */
+/* THEME:lounge */
+[data-theme='lounge'] {
+  --background: 20 38% 7%;
+  --foreground: 38 45% 92%;
+  --border: 20 20% 20%;
+  --input: 20 20% 26%;
+  --ring: 38 80% 60%;
+
+  --card: 20 30% 11%;
+  --card-foreground: 38 45% 92%;
+  --card-border: 20 22% 18%;
+
+  --popover: 20 30% 11%;
+  --popover-foreground: 38 45% 92%;
+  --popover-border: 20 20% 20%;
+
+  --primary: 21 86% 58%;
+  --primary-foreground: 20 38% 7%;
+  --secondary: 177 50% 24%;
+  --secondary-foreground: 38 45% 92%;
+  --accent: 38 80% 60%;
+  --accent-foreground: 20 38% 7%;
+  --muted: 20 22% 16%;
+  --muted-foreground: 35 22% 70%;
+  --destructive: 0 70% 58%;
+  --destructive-foreground: 20 38% 7%;
+
+  --glow: 0 0 0 1px hsl(21 86% 58% / 0.35), 0 10px 40px -10px hsl(28 95% 55% / 0.55);
+  --card-shadow: inset 0 1px 0 hsl(38 80% 60% / 0.12);
+  color-scheme: dark;
+}
+/* END THEME */
 
 @layer base {
   * {
     @apply border-border;
   }
+  /* A themed element paints its own surface, so sections can switch mid-page. */
+  [data-theme] {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    line-height: 1.65;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
+    text-wrap: balance;
+  }
+  /* Rounded, sign-painted serifs everywhere except the hero, which is tuned
+     separately (see the scroll story below). */
+  :where(h1, h2, h3, h4, h5, h6):not(.story *, .walk *) {
+    font-variation-settings: 'SOFT' 100;
+  }
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  /* Light text on dark reads heavier: lounge headings sit one step lighter. */
+  [data-theme='lounge'] h1:not([data-theme='sun'] *) {
+    font-weight: 700;
+  }
+  [data-theme='lounge'] :is(h2, h3):not([data-theme='sun'] *) {
+    font-weight: 600;
   }
 }
 
-.hero-parallax-bg {
-  transform-origin: center center;
+/* Film grain for any positioned surface: a static take on the hero's
+   .story-grain. The element needs position relative/absolute. */
+@layer components {
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+}
+
+@utility type-display {
+  font-family: var(--app-font-serif);
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 100;
+  text-wrap: balance;
+}
+
+@utility eyebrow {
+  font-family: var(--app-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+}
+
+@utility lead {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Pages set heading weights with utilities (font-black, font-bold), which
+   beat @layer base. Unlayered, this steps them down one notch in lounge. */
+[data-theme='lounge'] :is(h1, h2, h3, h4, h5, h6, .type-display):not(.story *, .walk *, [data-theme='sun'] *) {
+  &.font-black,
+  &.type-display {
+    font-weight: 800;
+  }
+  &.font-extrabold {
+    font-weight: 700;
+  }
+  &.font-bold {
+    font-weight: 600;
+  }
+}
+
+.scroll-scrub-viewport {
+  /* Fallback for browsers without small-viewport-unit support. */
+  height: 100vh;
+  /* Uses the viewport height with mobile browser chrome (URL bar) already
+     collapsed out, so the pinned video doesn't jump/resize as the user scrolls. */
+  height: 100svh;
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll story (components/scroll-scrub-hero.tsx)
+   The stage's data-phase is one of: intro, hero-hold, lounge, lounge-hold.
+   --story, --scrim and each beat's --enter/--exit are written per frame.
+   ------------------------------------------------------------------------ */
+:root {
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  /* For things leaving: gathers speed instead of settling. */
+  --ease-in-soft: cubic-bezier(0.55, 0, 0.75, 0.2);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.story-media {
+  transition:
+    filter 1.1s var(--ease-out-soft),
+    transform 1.4s var(--ease-out-soft);
+}
+.story[data-phase='hero-hold'] .story-media,
+.story[data-phase='lounge-hold'] .story-media {
+  filter: blur(14px) saturate(1.15);
+  transform: scale(1.06);
+}
+
+/* Lounge video appears instantly when entering the lounge (still under the
+   lifting blur), and on the way back only disappears once the blur is up. */
+.story-lounge-video {
+  opacity: 0;
+  transition: opacity 0.01s linear 0.6s;
+}
+.story[data-lounge='ready'][data-phase='lounge'] .story-lounge-video,
+.story[data-lounge='ready'][data-phase='lounge-hold'] .story-lounge-video {
+  opacity: 1;
+  transition-delay: 0s;
+}
+
+/* The brand teal wash suits the dusk exterior; ease it off indoors so the
+   lamp-lit interior keeps its warmth. */
+.story-base-gradient {
+  transition: opacity 1.2s var(--ease-out-soft);
+}
+.story[data-phase='lounge'] .story-base-gradient {
+  opacity: 0.45;
+}
+.story[data-phase='lounge-hold'] .story-base-gradient {
+  opacity: 0.15;
+}
+
+/* Teal dusk wash + vignette laid over each blurred hold frame. */
+.story-tint {
+  opacity: 0;
+  transition: opacity 1.1s var(--ease-out-soft);
+  background:
+    radial-gradient(ellipse at center, transparent 20%, hsl(var(--secondary) / 0.55) 75%, hsl(175 45% 10% / 0.85) 100%),
+    linear-gradient(to bottom, hsl(175 45% 12% / 0.35), hsl(var(--primary) / 0.12));
+}
+.story[data-phase='hero-hold'] .story-tint,
+.story[data-phase='lounge-hold'] .story-tint {
+  opacity: 1;
+}
+/* Inside, the hold keeps the lamplight: amber glow, deep wood-brown edges. */
+.story[data-phase='lounge-hold'] .story-tint,
+section > .story-tint {
+  background:
+    radial-gradient(ellipse at 50% 45%, hsl(30 80% 45% / 0.12) 0%, transparent 45%, hsl(20 45% 8% / 0.6) 80%, hsl(20 45% 5% / 0.9) 100%),
+    linear-gradient(to bottom, hsl(20 40% 8% / 0.35), hsl(20 40% 8% / 0.2));
+}
+/* Static (reduced-motion) use outside the stage. */
+section > .story-tint {
+  opacity: 1;
+}
+
+/* Lamp-lit shadow behind the lounge text: warm wood-brown, not the teal
+   used outside. */
+.story-scrim {
+  opacity: var(--scrim, 0);
+  background: linear-gradient(to top, hsl(20 40% 5% / 0.9) 0%, hsl(20 40% 5% / 0.55) 35%, transparent 65%);
+}
+@media (min-width: 768px) {
+  .story-scrim {
+    background: linear-gradient(to right, hsl(20 40% 5% / 0.8) 0%, hsl(20 40% 5% / 0.4) 38%, transparent 62%);
+  }
+}
+
+/* Opening copy drifts up with the camera, then steps back as the first
+   hold begins. */
+.story-intro > * {
+  transform: translate3d(0, calc(var(--hero, 0) * -2.5rem), 0);
+}
+.story-intro {
+  transition:
+    opacity 0.6s var(--ease-out-soft),
+    transform 0.8s var(--ease-out-soft),
+    filter 0.6s var(--ease-out-soft);
+}
+.story-intro[data-active='false'] {
+  opacity: 0;
+  transform: translateY(-2rem) scale(0.98);
+  filter: blur(6px);
+}
+
+.story-cue {
+  opacity: clamp(0, calc(1 - var(--hero, 0) * 14), 1);
+}
+.story-cue > div {
+  animation: story-cue-in 1s var(--ease-out-soft) 1.4s both;
+}
+.story-cue-line {
+  position: relative;
+  width: 1px;
+  height: 2.75rem;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.25);
+}
+.story-cue-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--primary));
+  animation: story-cue-drop 2.2s var(--ease-in-soft) infinite;
+}
+@keyframes story-cue-in {
+  from { opacity: 0; transform: translateY(0.5rem); }
+}
+@keyframes story-cue-drop {
+  0% { transform: translateY(-100%); }
+  55%, 100% { transform: translateY(100%); }
+}
+
+/* Lounge beats, driven entirely by scroll. Each line tilts up out of its
+   own mask on the way in and rises out of the top on the way out, both
+   staggered by --i. The whole beat drifts slowly upward while on screen. */
+.story-beat {
+  transform: translate3d(0, calc((0.5 - var(--local, 0)) * 3rem), 0);
+  text-shadow: 0 2px 30px rgb(0 0 0 / 0.35);
+}
+.story-beat h2 {
+  font-variation-settings: 'opsz' 144;
+}
+.beat-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.beat-line > span {
+  --in: clamp(0, calc(var(--enter, 0) * 1.6 - var(--i, 0) * 0.3), 1);
+  --out: clamp(0, calc(var(--exit, 0) * 1.6 - var(--i, 0) * 0.3), 1);
+  display: block;
+  transform-origin: left bottom;
+  transform: translate3d(0, calc((1 - var(--in)) * 110% - var(--out) * 110%), 0)
+    rotate(calc((1 - var(--in)) * 4deg));
+  opacity: calc(0.4 + 0.6 * var(--in) * (1 - var(--out)));
+}
+.beat-body {
+  --body-in: clamp(0, calc(var(--enter, 0) * 2.2 - 1.2), 1);
+  --body-out: clamp(0, calc(var(--exit, 0) * 2.5), 1);
+  opacity: calc(var(--body-in) * (1 - var(--body-out)));
+  transform: translate3d(0, calc((1 - var(--body-in)) * 0.75rem - var(--body-out) * 0.75rem), 0);
+}
+.beat-rule {
+  transform: scaleX(calc(var(--body-in) * (1 - var(--body-out))));
+  transform-origin: left;
+}
+
+/* ---------------------------------------------------------------------------
+   Timed reveals inside each hold. The group around each hold carries
+   data-active and data-side (before/after), so content enters from below
+   when scrolling down, from above when scrolling back up, and leaves quickly
+   in the direction of travel. Stagger with --d (a delay) on each element.
+   ------------------------------------------------------------------------ */
+.reveal {
+  --dir: 1;
+  opacity: 0;
+  transform: translate3d(0, calc(var(--dir) * 1rem), 0);
+  filter: blur(6px);
+  transition:
+    opacity 0.35s ease-in,
+    transform 0.45s var(--ease-in-soft),
+    filter 0.35s ease-in;
+}
+.group[data-side='after'] .reveal {
+  --dir: -1;
+}
+.group[data-active='true'] .reveal {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+  transition:
+    opacity 1s var(--ease-out-soft) var(--d, 0ms),
+    transform 1.2s var(--ease-out-soft) var(--d, 0ms),
+    filter 1s var(--ease-out-soft) var(--d, 0ms);
+}
+
+/* A headline line that rises out of its own mask. */
+.reveal-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.reveal-line > span {
+  display: block;
+  transform-origin: left bottom;
+  transform: translate3d(0, 110%, 0) rotate(4deg);
+  transition: transform 0.5s var(--ease-in-soft);
+}
+.group[data-side='after'] .reveal-line > span {
+  transform: translate3d(0, -110%, 0);
+}
+.group[data-active='true'] .reveal-line > span {
+  transform: none;
+  transition: transform 1.2s var(--ease-out-soft) calc(var(--d, 0ms) + var(--i, 0) * 130ms);
+}
+
+/* A hairline that draws outward from the text it frames. */
+.reveal-rule {
+  transform: scaleX(0);
+  transition: transform 0.35s ease-in;
+}
+.group[data-active='true'] .reveal-rule {
+  transform: scaleX(1);
+  transition: transform 1.1s var(--ease-out-soft) var(--d, 0ms);
+}
+
+/* Film grain keeps the frame from looking flat and digital. */
+.story-grain {
+  inset: -50%;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  animation: story-grain 0.9s steps(5) infinite;
+}
+@keyframes story-grain {
+  0% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-4%, 3%, 0); }
+  40% { transform: translate3d(3%, -5%, 0); }
+  60% { transform: translate3d(-6%, -2%, 0); }
+  80% { transform: translate3d(5%, 4%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* Slim progress rail; each hold's mark lights up once it has been reached. */
+.story-rail {
+  width: 1px;
+  height: 9rem;
+  background: rgb(255 255 255 / 0.18);
+}
+.story-rail-fill {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--primary));
+  transform: scaleY(var(--story, 0));
+  transform-origin: top;
+}
+.story-rail-mark {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--at) * 100%);
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  translate: -50% -50%;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 3px rgb(0 0 0 / 0.25);
+  opacity: clamp(0.3, calc((var(--story, 0) - var(--at) + 0.002) * 1000), 1);
+  scale: clamp(0.7, calc((var(--story, 0) - var(--at) + 0.002) * 1000), 1);
+  transition: opacity 0.3s, scale 0.4s var(--ease-out-soft);
+}
+
+/* Coaster badge in the bar hold. It's set down on the bar (drops in, lands
+   with a small bounce and a ripple), then turns slowly while on screen. */
+.coaster-in {
+  opacity: 0;
+  scale: 1.5;
+  rotate: -40deg;
+  filter: blur(6px);
+  transition:
+    opacity 0.3s ease-in,
+    scale 0.35s ease-in,
+    rotate 0.35s ease-in,
+    filter 0.3s ease-in;
+}
+.group[data-active='true'] .coaster-in {
+  opacity: 1;
+  scale: 1;
+  rotate: 0deg;
+  filter: blur(0);
+  transition:
+    opacity 0.45s ease-out 0.8s,
+    scale 0.8s var(--ease-spring) 0.8s,
+    rotate 1.2s var(--ease-out-soft) 0.8s,
+    filter 0.45s ease-out 0.8s;
+}
+.coaster-ripple {
+  opacity: 0;
+}
+.group[data-active='true'] .coaster-ripple {
+  animation: coaster-ripple 1s var(--ease-out-soft) 1.1s both;
+}
+@keyframes coaster-ripple {
+  from { opacity: 0.7; scale: 1; }
+  to { opacity: 0; scale: 1.7; }
+}
+
+.coaster-spin {
+  animation: coaster-spin 28s linear infinite;
+  animation-play-state: paused;
+}
+.group[data-active='true'] .coaster-spin {
+  animation-play-state: running;
+}
+@keyframes coaster-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Oversized outlined year behind the end-scene headline, like an old
+   neon motel sign seen through the haze: it flickers on as the hold
+   begins and simply cuts out when it ends. */
+.hero-year-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px hsl(var(--primary) / 0.6);
+  filter: drop-shadow(0 0 14px hsl(var(--primary) / 0.45));
+  font-variation-settings: 'opsz' 144;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  opacity: 0;
+  scale: 1.04;
+  transition: scale 2s var(--ease-out-soft);
+}
+.group[data-active='true'] .hero-year-outline {
+  scale: 1;
+  animation: neon-on 1.5s linear 0.25s both;
+}
+@keyframes neon-on {
+  0% { opacity: 0; }
+  6% { opacity: 0.7; }
+  9% { opacity: 0.1; }
+  16% { opacity: 0.85; }
+  19% { opacity: 0.25; }
+  32% { opacity: 1; }
+  35% { opacity: 0.5; }
+  45%, 100% { opacity: 1; }
+}
+
+/* ---------------------------------------------------------------------------
+   Walk-in sequence (components/walk-in-sequence.tsx)
+   Each photo gets --shown (fade in over the one before) and --push (slow
+   push-in toward its focus point); captions reuse the lounge beat styles.
+   ------------------------------------------------------------------------ */
+.walk-photo {
+  opacity: var(--shown, 0);
+}
+.walk-photo img {
+  transform: scale(calc(1.02 + var(--push, 0) * 0.16));
   will-change: transform;
+}
+/* Night-walk grade: keeps captions legible and the four photos in one key. */
+.walk-shade {
+  background:
+    radial-gradient(ellipse at 60% 40%, transparent 30%, hsl(20 45% 5% / 0.55) 85%, hsl(20 45% 4% / 0.85) 100%),
+    linear-gradient(to top, hsl(20 40% 5% / 0.85) 0%, hsl(20 40% 5% / 0.35) 38%, transparent 62%);
+}
+.walk-count {
+  display: inline-grid;
+}
+.walk-count > span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  translate: 0 0.4em;
+  transition: opacity 0.4s, translate 0.5s var(--ease-out-soft);
+}
+.walk[data-frame='0'] .walk-count > [data-n='0'],
+.walk[data-frame='1'] .walk-count > [data-n='1'],
+.walk[data-frame='2'] .walk-count > [data-n='2'],
+.walk[data-frame='3'] .walk-count > [data-n='3'] {
+  opacity: 1;
+  translate: 0 0;
+  color: white;
+}
+.walk-bar {
+  position: relative;
+  width: 3.5rem;
+  height: 1px;
+  background: rgb(255 255 255 / 0.25);
+}
+.walk-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--primary));
+  transform: scaleX(var(--walk, 0));
+  transform-origin: left;
+}
+
+/* ---------------------------------------------------------------------------
+   Flaming bowl (components/flaming-bowl.tsx)
+   A cinemagraph made in CSS. Everything is paused until data-inview="true".
+   ------------------------------------------------------------------------ */
+.fire {
+  container-type: size;
+}
+/* Specific enough to beat the `animation` shorthands below. */
+.fire[data-inview='false'] * {
+  animation-play-state: paused;
+}
+
+/* Rack focus the first time it comes into view. */
+.fire-photo {
+  scale: 1.08;
+  filter: blur(10px) brightness(0.7);
+  transition:
+    scale 2.2s var(--ease-out-soft),
+    filter 1.6s var(--ease-out-soft);
+}
+.fire[data-inview='true'] .fire-photo {
+  scale: 1;
+  filter: none;
+}
+
+/* Firelight thrown over the whole scene: the bartender, the mug, the bar. */
+.fire-cast {
+  mix-blend-mode: soft-light;
+  background: radial-gradient(ellipse 70% 60% at 29% 45%, hsl(30 100% 60% / 0.9), hsl(20 100% 45% / 0.35) 45%, transparent 75%);
+  animation: fire-flicker 2.6s steps(1, end) infinite;
+}
+
+/* Hot core of the flame, breathing and licking upward. */
+.fire-glow {
+  left: 12%;
+  width: 34%;
+  top: 6%;
+  height: 68%;
+  mix-blend-mode: screen;
+  transform-origin: 50% 100%;
+  background: radial-gradient(ellipse 50% 60% at 50% 70%, hsl(40 100% 75% / 0.55), hsl(25 100% 55% / 0.25) 45%, transparent 72%);
+  filter: blur(6px);
+  animation: fire-lick 1.3s ease-in-out infinite alternate, fire-flicker 1.9s steps(1, end) infinite;
+}
+
+.fire-ember {
+  position: absolute;
+  top: 70%;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+  background: hsl(40 100% 75%);
+  box-shadow: 0 0 6px 2px hsl(25 100% 55% / 0.8);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation-name: fire-ember;
+  animation-timing-function: cubic-bezier(0.3, 0.6, 0.5, 1);
+  animation-iteration-count: infinite;
+}
+
+@keyframes fire-flicker {
+  0% { opacity: 0.85; }
+  8% { opacity: 1; }
+  15% { opacity: 0.7; }
+  27% { opacity: 0.95; }
+  33% { opacity: 0.8; }
+  46% { opacity: 1; }
+  52% { opacity: 0.65; }
+  61% { opacity: 0.9; }
+  74% { opacity: 0.75; }
+  83% { opacity: 1; }
+  91% { opacity: 0.8; }
+}
+@keyframes fire-lick {
+  0% { transform: scale(1, 1) skewX(0deg); }
+  35% { transform: scale(0.94, 1.08) skewX(-3deg); }
+  70% { transform: scale(1.05, 0.95) skewX(2deg); }
+  100% { transform: scale(0.97, 1.1) skewX(-1deg); }
+}
+@keyframes fire-ember {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
+  12% { opacity: 1; }
+  70% { opacity: 0.8; }
+  100% { opacity: 0; transform: translate3d(var(--drift), calc(var(--rise) * -1), 0) scale(0.3); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-parallax-bg {
-    transform: none !important;
-    will-change: auto;
+  .coaster-spin,
+  .story-grain,
+  .story-cue-line::after,
+  .fire-cast,
+  .fire-glow {
+    animation: none;
+  }
+  .fire-ember {
+    display: none;
+  }
+  .fire-photo {
+    scale: 1;
+    filter: none;
+    transition: none;
   }
 }

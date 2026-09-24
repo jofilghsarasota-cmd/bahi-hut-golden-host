@@ -73,7 +73,7 @@ export default function Resort() {
               </div>
 
               <div className="pt-8">
-                <Button size="lg" className="text-lg px-8 py-6 rounded-full w-full sm:w-auto shadow-xl" asChild>
+                <Button size="lg" className="w-full sm:w-auto" asChild>
                   <a href="https://booking.hotelkeyapp.com/v2/index.html#/booking/search?pc=1055&property_id=dcb4a0ce-88b0-45b0-a4c8-e01bb6a6ad07&url=https%3A%2F%2Fwww.bahihut.com%2Fghresort" target="_blank" rel="noopener noreferrer">
                     <BedDouble className="w-5 h-5 mr-2" /> Book Your Stay
                   </a>
@@ -91,7 +91,7 @@ export default function Resort() {
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
             The Golden Host Resort is the official home of Tiki Fever, Sarasota's premier celebration of Polynesian pop culture, midcentury style, and tropical cocktails.
           </p>
-          <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors" asChild>
+          <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground" asChild>
             <a href="https://www.tikifever.com" target="_blank" rel="noopener noreferrer">
               Discover Tiki Fever
             </a>
