@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Calendar, Clock, Users } from 'lucide-react';
 import ScrollScrubHero, { type LoungeBeat } from '@/components/scroll-scrub-hero';
 import WalkInSequence from '@/components/walk-in-sequence';
+import EscapeDive from '@/components/escape-dive';
 import FlamingBowl from '@/components/flaming-bowl';
 import poolImg from '@assets/generated_images/resort-pool.jpg';
 
@@ -147,6 +148,49 @@ function BarHold() {
         </Button>
         <Button size="lg" variant="glass" className="w-full sm:w-auto" asChild>
           <Link href="/shop">Shop Mugs</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// Text revealed as the camera drops from the neighborhood to the door.
+const ESCAPE_BEATS: LoungeBeat[] = [
+  {
+    lines: ['Right on the', 'Tamiami Trail.'],
+    body: 'Next door to the Golden Host Resort.',
+  },
+  {
+    lines: ['Look for the', 'thatched roofs.'],
+    body: 'Walk in under the palms. The Mai Tais are waiting.',
+  },
+];
+
+const ESCAPE_HEADLINE = ['Find Your', 'Escape'];
+
+// Ending of the dive, shown on the blurred entrance.
+function EscapeHold() {
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className="font-serif font-light text-white text-6xl md:text-8xl lg:text-9xl leading-[0.95] tracking-[-0.015em] drop-shadow-[0_2px_30px_rgba(0,0,0,0.5)] [font-variation-settings:'opsz'_144]">
+        <RevealLines lines={ESCAPE_HEADLINE} startMs={200} />
+      </h2>
+
+      <p className="reveal mt-8 flex flex-col sm:flex-row items-center gap-2 text-lg md:text-xl text-white/90" style={delay(550)}>
+        <MapPin aria-hidden="true" className="w-5 h-5 shrink-0 text-primary" />
+        <span>
+          4675 N Tamiami Trail, <span className="whitespace-nowrap">Sarasota FL 34234</span>
+        </span>
+      </p>
+
+      <div className="reveal mt-10 w-full flex flex-col sm:flex-row items-center justify-center gap-4" style={delay(850)}>
+        <Button size="lg" className="w-full sm:w-auto" asChild>
+          <a href="https://maps.google.com/?q=4675+N+Tamiami+Trail+Sarasota+FL+34234" target="_blank" rel="noopener noreferrer">
+            Get Directions
+          </a>
+        </Button>
+        <Button size="lg" variant="glass" className="w-full sm:w-auto" asChild>
+          <a href="tel:9413555141">(941) 355-5141</a>
         </Button>
       </div>
     </div>
@@ -304,25 +348,10 @@ export default function Home() {
       {/* The real walk from the street to the door, leading into directions. */}
       <WalkInSequence />
 
-      {/* Location Banner */}
-      <section className="bg-secondary text-secondary-foreground py-16 border-t border-white/10">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Find Your Escape</h2>
-          <p className="text-xl mb-8 font-medium">4675 N Tamiami Trail, Sarasota FL 34234</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="glass" asChild>
-              <a href="https://maps.google.com/?q=4675+N+Tamiami+Trail+Sarasota+FL+34234" target="_blank" rel="noopener noreferrer">
-                Get Directions
-              </a>
-            </Button>
-            <Button size="lg" variant="glass" asChild>
-              <a href="tel:9413555141">
-                (941) 355-5141
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* Aerial dive from the neighborhood down to the door, leading into directions. */}
+      <EscapeDive beats={ESCAPE_BEATS}>
+        <EscapeHold />
+      </EscapeDive>
     </div>
   );
 }
