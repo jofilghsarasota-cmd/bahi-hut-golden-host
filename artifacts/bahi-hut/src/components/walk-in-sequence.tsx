@@ -11,6 +11,32 @@ import alohaImg from '@assets/generated_images/res/3.avif';
 // Each photo pushes in slowly while it's on screen and the next one fades in
 // over it, so the sequence reads as one camera walking forward. Captions use
 // the same masked-line reveal as the lounge beats in the hero.
+//
+// On top of the photos: the real bulbs in each shot twinkle, light sources
+// breathe or buzz like neon, soft bokeh drifts past at different depths (its
+// color follows the walk from blue to warm to red), a light leak sweeps across
+// each cut, and the camera sways a little with every step.
+
+// A point of light sitting on a real bulb, in % of the photo.
+type Glint = [x: number, y: number];
+
+interface GlintSet {
+  hue: string; // hsl() components
+  size: number; // rem
+  points: Glint[];
+  // Every nth glint gets a cross flare.
+  flareEvery?: number;
+}
+
+interface Glow {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  hue: string;
+  kind: 'breathe' | 'neon';
+}
+
 export interface WalkInFrame {
   src: string;
   alt: string;
@@ -18,6 +44,14 @@ export interface WalkInFrame {
   focus: string;
   lines: string[];
   body?: string;
+  // Photo aspect ratio, so light effects stay pinned to the right spots.
+  aspect: number;
+  // Hue the ambient light shifts toward while this photo is up.
+  hue: number;
+  // Makes the last caption line glow in this color.
+  glow?: string;
+  glints?: GlintSet[];
+  glows?: Glow[];
 }
 
 const FRAMES: WalkInFrame[] = [
@@ -27,6 +61,27 @@ const FRAMES: WalkInFrame[] = [
     focus: '50% 58%',
     lines: ['Follow the', 'blue lights.'],
     body: 'Just off the Tamiami Trail, next to the Golden Host Resort.',
+    aspect: 1496 / 1000,
+    hue: 225,
+    glow: '222 100% 66%',
+    glints: [
+      {
+        hue: '222 100% 72%',
+        size: 1.6,
+        flareEvery: 3,
+        points: [
+          [25.4, 7.5], [34.8, 6], [31.4, 10], [42.8, 12], [10, 11], [22, 16], [16.7, 23], [26.7, 20],
+          [6, 25], [20, 30], [13.4, 38], [23.4, 42], [8.7, 44], [17.4, 50], [26, 56], [11.4, 60],
+          [5.3, 65], [20, 65], [15.4, 72], [8, 76], [22.7, 76], [17.4, 85], [12, 82], [4, 56], [27.4, 47],
+        ],
+      },
+      {
+        hue: '42 100% 76%',
+        size: 0.8,
+        points: [[62.2, 33], [67.5, 36], [73.5, 31], [80.2, 30], [86.9, 29], [90.9, 35], [90.9, 45], [90.2, 60], [58.2, 39.5]],
+      },
+    ],
+    glows: [{ x: 48.8, y: 49, w: 26, h: 34, hue: '330 85% 62%', kind: 'breathe' }],
   },
   {
     src: signImg,
@@ -34,6 +89,20 @@ const FRAMES: WalkInFrame[] = [
     focus: '66% 52%',
     lines: ['Look for', 'the sign.'],
     body: "Block letters on a block wall. You can't miss it after dark.",
+    aspect: 780 / 446,
+    hue: 398,
+    glints: [
+      {
+        hue: '42 100% 76%',
+        size: 1.1,
+        flareEvery: 3,
+        points: [[85, 8.8], [90, 2.2], [87.5, 19.7], [93.8, 13], [96.3, 26], [92.5, 33], [86.3, 26], [82.5, 4.4], [94.4, 20.8]],
+      },
+    ],
+    glows: [
+      { x: 44, y: 78, w: 42, h: 55, hue: '40 90% 62%', kind: 'breathe' },
+      { x: 66, y: 55, w: 30, h: 30, hue: '38 80% 60%', kind: 'breathe' },
+    ],
   },
   {
     src: totemImg,
@@ -41,6 +110,21 @@ const FRAMES: WalkInFrame[] = [
     focus: '40% 12%',
     lines: ['Say hello', 'to the doorman.'],
     body: 'Hand-carved tikis keep watch at the entrance.',
+    aspect: 1320 / 1977,
+    hue: 398,
+    glints: [
+      {
+        hue: '44 100% 78%',
+        size: 1.3,
+        flareEvery: 3,
+        points: [
+          [11.3, 1.7], [16.3, 7.9], [21.3, 7.5], [30, 1.3], [53.8, 5.4], [61.3, 5.4], [70, 9.2], [75, 3.3],
+          [82.5, 2.5], [88.8, 5.8], [95, 5.4], [58.8, 23], [65, 24.6], [72.5, 26.7], [80, 28.8], [87.5, 29.2],
+          [10, 43], [15, 44.7], [67.5, 12.5], [12.5, 5],
+        ],
+      },
+    ],
+    glows: [{ x: 37.5, y: 24, w: 24, h: 18, hue: '225 90% 60%', kind: 'breathe' }],
   },
   {
     src: alohaImg,
@@ -48,6 +132,16 @@ const FRAMES: WalkInFrame[] = [
     focus: '57% 0%',
     lines: ['Aloha.'],
     body: 'Pull up a stool. The Mai Tais are strong.',
+    aspect: 1320 / 1191,
+    hue: 350,
+    glow: '350 95% 62%',
+    glints: [{ hue: '0 0% 100%', size: 0.9, flareEvery: 1, points: [[51, 48], [64.5, 48.5], [57.8, 25]] }],
+    glows: [
+      { x: 55.6, y: 11, w: 44, h: 22, hue: '350 95% 58%', kind: 'neon' },
+      { x: 57, y: 66, w: 26, h: 16, hue: '215 95% 60%', kind: 'breathe' },
+      { x: 96, y: 22, w: 14, h: 22, hue: '220 95% 60%', kind: 'breathe' },
+      { x: 97, y: 62, w: 14, h: 26, hue: '38 95% 60%', kind: 'breathe' },
+    ],
   },
 ];
 
@@ -67,6 +161,26 @@ const smoothstep = (from: number, to: number, x: number) => {
   const t = clamp01((x - from) / (to - from));
   return t * t * (3 - 2 * t);
 };
+
+// Deterministic pseudo-random, so the lights look the same on every render.
+const rand = (n: number) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+// Out-of-focus lights drifting between the camera and the scene.
+const BOKEH = Array.from({ length: 18 }, (_, i) => {
+  const depth = rand(i + 1);
+  return {
+    x: rand(i + 20) * 100,
+    y: rand(i + 40) * 100,
+    size: 2 + depth * 7, // rem: nearer is bigger
+    depth,
+    drift: 9 + rand(i + 60) * 8,
+    delay: -rand(i + 80) * 12,
+    alpha: 0.25 + (1 - depth) * 0.35,
+  };
+});
 
 export default function WalkInSequence() {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -91,6 +205,9 @@ export default function WalkInSequence() {
     if (!wrapper || !stage) return;
 
     let eased = 0;
+    // Pointer position, -1..1 on each axis, and the camera's eased copy of it.
+    const pointer = { x: 0, y: 0 };
+    const pointerEased = { x: 0, y: 0 };
     let rafId = 0;
     let isAnimating = false;
     let lastTimestamp = 0;
@@ -124,6 +241,9 @@ export default function WalkInSequence() {
         const push = clamp01((f - i + 0.3) / 1.4);
         setVar(el, `p${i}`, '--shown', shown);
         setVar(el, `p${i}`, '--push', push);
+        // Only the photos on screen keep their lights animating.
+        const on = String(shown > 0.01 && (i === last || f < i + 1.05));
+        if (el.dataset.on !== on) el.dataset.on = on;
       });
 
       captionRefs.current.forEach((el, i) => {
@@ -139,6 +259,30 @@ export default function WalkInSequence() {
       const current = Math.min(Math.floor(f + 0.1), last);
       stage.dataset.frame = String(current);
       setVar(stage, 's', '--walk', f / FRAMES.length);
+
+      // The ambient hue follows the crossfades from photo to photo, and a
+      // light leak flares across each cut, gone again once it lands.
+      let hue = FRAMES[0].hue;
+      let leak = 0;
+      let leakX = 0;
+      for (let i = 1; i <= last; i++) {
+        hue += smoothstep(i - 0.3, i + 0.05, f) * (FRAMES[i].hue - FRAMES[i - 1].hue);
+        const t = clamp01((f - (i - 0.42)) / 0.6);
+        if (t > 0 && t < 1) {
+          leak = Math.sin(Math.PI * t);
+          leakX = t;
+        }
+      }
+      setVar(stage, 's', '--glow-h', hue);
+      setVar(stage, 's', '--leak', leak);
+      setVar(stage, 's', '--leak-x', leakX);
+
+      // Two footsteps per photo: a small dip and a sway side to side.
+      const step = f * Math.PI * 2;
+      setVar(stage, 's', '--bob', -Math.abs(Math.sin(step)));
+      setVar(stage, 's', '--sway', Math.sin(step));
+      setVar(stage, 's', '--mx', pointerEased.x);
+      setVar(stage, 's', '--my', pointerEased.y);
     };
 
     const tick = (timestamp: number) => {
@@ -151,9 +295,21 @@ export default function WalkInSequence() {
       const delta = target - eased;
       eased = Math.abs(delta) < SETTLE_THRESHOLD ? target : eased + delta * factor;
 
+      // The camera follows the pointer more lazily than the scroll.
+      let pointerSettled = true;
+      for (const axis of ['x', 'y'] as const) {
+        const d = pointer[axis] - pointerEased[axis];
+        if (Math.abs(d) < 0.001) {
+          pointerEased[axis] = pointer[axis];
+        } else {
+          pointerEased[axis] += d * factor * 0.5;
+          pointerSettled = false;
+        }
+      }
+
       render(eased);
 
-      if (eased !== target) {
+      if (eased !== target || !pointerSettled) {
         rafId = window.requestAnimationFrame(tick);
       } else {
         isAnimating = false;
@@ -168,14 +324,40 @@ export default function WalkInSequence() {
       }
     };
 
+    const handlePointer = (e: PointerEvent) => {
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+      ensureAnimating();
+    };
+    const resetPointer = () => {
+      pointer.x = 0;
+      pointer.y = 0;
+      ensureAnimating();
+    };
+    // Touch screens get the scroll effects only.
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+
+    // Pause every looping light while the section is off screen.
+    const observer = new IntersectionObserver(([entry]) => {
+      stage.dataset.inview = String(entry.isIntersecting);
+    });
+    observer.observe(stage);
+
     eased = getTarget();
     render(eased);
 
     window.addEventListener('scroll', ensureAnimating, { passive: true });
     window.addEventListener('resize', ensureAnimating, { passive: true });
+    if (finePointer) {
+      stage.addEventListener('pointermove', handlePointer, { passive: true });
+      stage.addEventListener('pointerleave', resetPointer);
+    }
     return () => {
       window.removeEventListener('scroll', ensureAnimating);
       window.removeEventListener('resize', ensureAnimating);
+      stage.removeEventListener('pointermove', handlePointer);
+      stage.removeEventListener('pointerleave', resetPointer);
+      observer.disconnect();
       if (rafId) window.cancelAnimationFrame(rafId);
     };
   }, [reducedMotion]);
@@ -204,26 +386,93 @@ export default function WalkInSequence() {
       <div
         ref={stageRef}
         data-frame="0"
+        data-inview="true"
         className="walk scroll-scrub-viewport sticky top-0 w-full overflow-hidden bg-[hsl(20_40%_6%)]"
       >
-        {FRAMES.map((frame, i) => (
-          <div
-            key={frame.src}
-            ref={(el) => {
-              photoRefs.current[i] = el;
-            }}
-            className="walk-photo absolute inset-0"
-          >
-            <img
-              src={frame.src}
-              alt={frame.alt}
-              loading={i === 0 ? 'eager' : 'lazy'}
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ transformOrigin: frame.focus, objectPosition: frame.focus }}
+        <div className="walk-camera absolute inset-0">
+          {FRAMES.map((frame, i) => {
+            const [fx, fy] = frame.focus.split(' ');
+            return (
+              <div
+                key={frame.src}
+                ref={(el) => {
+                  photoRefs.current[i] = el;
+                }}
+                data-on={i === 0 ? 'true' : 'false'}
+                className="walk-photo absolute inset-0"
+              >
+                {/* Sized like object-fit: cover, so the lights stay on their bulbs. */}
+                <div className="walk-cover" style={{ '--ar': frame.aspect, '--fx': fx, '--fy': fy } as CSSProperties}>
+                  <img
+                    src={frame.src}
+                    alt={frame.alt}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full"
+                  />
+                  <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+                    {frame.glows?.map((g, gi) => (
+                      <span
+                        key={`g${gi}`}
+                        className="walk-glow"
+                        data-kind={g.kind}
+                        style={
+                          {
+                            left: `${g.x}%`,
+                            top: `${g.y}%`,
+                            width: `${g.w}%`,
+                            height: `${g.h}%`,
+                            '--c': g.hue,
+                            '--d': `${-gi * 1.7}s`,
+                          } as CSSProperties
+                        }
+                      />
+                    ))}
+                    {frame.glints?.flatMap((set, si) =>
+                      set.points.map(([x, y], pi) => (
+                        <span
+                          key={`${si}-${pi}`}
+                          className="walk-glint"
+                          data-flare={set.flareEvery && pi % set.flareEvery === 0 ? 'true' : undefined}
+                          style={
+                            {
+                              left: `${x}%`,
+                              top: `${y}%`,
+                              '--c': set.hue,
+                              '--s': `${set.size * (0.75 + rand(pi + si * 50) * 0.5)}rem`,
+                              '--t': `${1.8 + rand(pi + 7) * 2.6}s`,
+                              '--d': `${-rand(pi + 13) * 4}s`,
+                            } as CSSProperties
+                          }
+                        />
+                      )),
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div aria-hidden="true" className="walk-leak absolute z-[1] pointer-events-none" />
+        <div aria-hidden="true" className="walk-bokeh absolute inset-x-0 z-[1] pointer-events-none">
+          {BOKEH.map((b, i) => (
+            <span
+              key={i}
+              style={
+                {
+                  left: `${b.x}%`,
+                  top: `${b.y}%`,
+                  '--s': `${b.size}rem`,
+                  '--z': b.depth,
+                  '--a': b.alpha,
+                  '--t': `${b.drift}s`,
+                  '--d': `${b.delay}s`,
+                } as CSSProperties
+              }
             />
-          </div>
-        ))}
+          ))}
+        </div>
 
         <div aria-hidden="true" className="walk-shade absolute inset-0 z-[1] pointer-events-none" />
         <div aria-hidden="true" className="story-grain absolute z-[2] pointer-events-none" />
@@ -239,11 +488,19 @@ export default function WalkInSequence() {
                 className="story-beat [grid-area:1/1] self-end pb-24 md:pb-28 max-w-xl"
               >
                 <h2 className="font-serif font-light text-white text-4xl md:text-6xl leading-[1.04] tracking-[-0.01em]">
-                  {frame.lines.map((line, li) => (
-                    <span key={li} className="beat-line" style={{ '--i': li } as CSSProperties}>
-                      <span>{line}</span>
-                    </span>
-                  ))}
+                  {frame.lines.map((line, li) => {
+                    const glow = frame.glow && li === frame.lines.length - 1;
+                    return (
+                      <span key={li} className="beat-line" style={{ '--i': li } as CSSProperties}>
+                        <span
+                          className={glow ? 'beat-glow' : undefined}
+                          style={glow ? ({ '--c': frame.glow } as CSSProperties) : undefined}
+                        >
+                          {line}
+                        </span>
+                      </span>
+                    );
+                  })}
                 </h2>
                 {frame.body && (
                   <div className="beat-body mt-6 flex items-center gap-4">
