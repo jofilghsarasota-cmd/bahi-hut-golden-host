@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, X, Palmtree, MapPin, Calendar, ShoppingBag, GlassWater, BedDouble, Info, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { themeForPath } from '@/lib/page-theme';
 import logoImg from '@assets/generated_images/logo/BAHI_HUT_LOGO.jpg';
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const theme = themeForPath(location);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -26,7 +28,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col font-sans bg-background selection:bg-primary/20 selection:text-foreground">
       {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <header data-theme={theme} className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container mx-auto px-4 lg:px-8 flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
             <img src={logoImg} alt="Bahi Hut Cocktail Lounge" className="h-16 w-16 rounded-full object-contain" />
@@ -91,12 +93,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main data-theme={theme} className="flex-1">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="bg-secondary text-secondary-foreground pt-16 pb-8 border-t-4 border-primary">
+      <footer data-theme="lounge" className="bg-secondary text-secondary-foreground pt-16 pb-8 border-t-4 border-primary">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             <div>
