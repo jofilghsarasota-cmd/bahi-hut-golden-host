@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400..700;1,400..700&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400..700;1,400..700&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,100..900,0..100;1,9..144,100..900,0..100&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -159,9 +159,40 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    line-height: 1.65;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
+    text-wrap: balance;
+  }
+  /* Rounded, sign-painted serifs everywhere except the hero, which is tuned
+     separately (see the scroll story below). */
+  :where(h1, h2, h3, h4, h5, h6):not(.story *, .walk *) {
+    font-variation-settings: 'SOFT' 100;
+  }
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  /* Light text on dark reads heavier: lounge headings sit one step lighter. */
+  [data-theme='lounge'] h1:not([data-theme='sun'] *) {
+    font-weight: 700;
+  }
+  [data-theme='lounge'] :is(h2, h3):not([data-theme='sun'] *) {
+    font-weight: 600;
   }
 }
 
@@ -176,6 +207,47 @@
     opacity: 0.08;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+}
+
+@utility type-display {
+  font-family: var(--app-font-serif);
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 100;
+  text-wrap: balance;
+}
+
+@utility eyebrow {
+  font-family: var(--app-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+}
+
+@utility lead {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Pages set heading weights with utilities (font-black, font-bold), which
+   beat @layer base. Unlayered, this steps them down one notch in lounge. */
+[data-theme='lounge'] :is(h1, h2, h3, h4, h5, h6, .type-display):not(.story *, .walk *, [data-theme='sun'] *) {
+  &.font-black,
+  &.type-display {
+    font-weight: 800;
+  }
+  &.font-extrabold {
+    font-weight: 700;
+  }
+  &.font-bold {
+    font-weight: 600;
   }
 }
 
