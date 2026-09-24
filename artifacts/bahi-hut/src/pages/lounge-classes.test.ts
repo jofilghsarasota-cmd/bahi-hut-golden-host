@@ -45,6 +45,21 @@ describe.each(Object.values(PAGES))('%s', (file) => {
   });
 });
 
+describe.each(['shop.tsx', 'events.tsx'])('%s filter row', (file) => {
+  // Pill buttons are wider now; four of them overflow a 390px phone unless the row wraps.
+  it('wraps on narrow screens', () => {
+    const row = read(file).match(/<div className="([^"]*)">\s*(?:<span[^>]*>[^<]*<\/span>\s*)?(?:<Button|\{categories|\{allTags)/)?.[1] ?? '';
+    expect(row.split(' ')).toContain('flex-wrap');
+  });
+});
+
+describe('private events', () => {
+  // Cards now have visible borders, so a negative-margin stagger shows as overlap.
+  it('does not pull bordered cards into each other', () => {
+    expect(read('private-events.tsx')).not.toMatch(/<Card className="[^"]*(?<![\w-])-m[ty]-/);
+  });
+});
+
 describe('home', () => {
   // In lounge, primary-foreground is dark koa, so it can't stand in for white over video.
   it('only uses primary-foreground on a solid primary surface', () => {

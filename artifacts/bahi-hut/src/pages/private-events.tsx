@@ -58,7 +58,7 @@ export default function PrivateEvents() {
                   <p className="text-sm text-muted-foreground">Reserve tables or private areas for your crew.</p>
                 </CardContent>
               </Card>
-              <Card className="-mt-8">
+              <Card>
                 <CardContent className="p-6 text-center space-y-4">
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                     <Briefcase className="w-6 h-6" />

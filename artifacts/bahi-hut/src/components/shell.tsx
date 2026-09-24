@@ -57,7 +57,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [location]);
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-background selection:bg-primary/20 selection:text-foreground">
+    // Themed too: it's what shows through the translucent header at the top.
+    <div data-theme={theme} className="min-h-screen flex flex-col font-sans bg-background selection:bg-primary/20 selection:text-foreground">
       {/* Fixed over the home hero (transparent until it scrolls past), sticky elsewhere. */}
       <header
         data-theme={theme}
@@ -103,8 +104,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   <NavigationMenuTrigger
                     className={cn(
                       navLinkClass(moreActive, overlaid),
-                      'bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent data-[state=open]:hover:bg-transparent',
-                      overlaid && 'hover:text-white focus:text-white data-[state=open]:text-white',
+                      'rounded-md bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent data-[state=open]:hover:bg-transparent data-[state=open]:focus:bg-transparent',
+                      'focus-visible:ring-2 focus-visible:ring-ring',
+                      overlaid
+                        ? 'hover:text-white focus:text-white data-[state=open]:text-white'
+                        : 'focus:text-foreground data-[state=open]:text-foreground',
                     )}
                   >
                     More

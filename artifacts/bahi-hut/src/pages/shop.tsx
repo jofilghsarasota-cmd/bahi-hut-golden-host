@@ -83,7 +83,7 @@ export default function Shop() {
 
       <section className="py-8 bg-card border-b border-border">
         <div className="container mx-auto px-4">
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-3">
             {categories.map(cat => (
               <Button
                 key={cat}
