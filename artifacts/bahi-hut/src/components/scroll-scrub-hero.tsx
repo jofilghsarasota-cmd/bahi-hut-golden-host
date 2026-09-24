@@ -324,7 +324,7 @@ export default function ScrollScrubHero({
     // Static fallback: the opening hero, then the bar with its ending.
     return (
       <>
-        <section className="scroll-scrub-viewport relative w-full overflow-hidden bg-secondary">
+        <section data-header-overlay className="scroll-scrub-viewport relative w-full overflow-hidden bg-secondary">
           <img src={HERO_POSTER} alt="Bahi Hut entrance" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/50 to-transparent" />
           <div className="container relative z-10 mx-auto px-4 h-full flex items-center justify-center text-center">
@@ -347,7 +347,7 @@ export default function ScrollScrubHero({
   }
 
   return (
-    <div ref={wrapperRef} className="relative" style={{ height: `${WRAPPER_VH}vh` }}>
+    <div ref={wrapperRef} data-header-overlay className="relative" style={{ height: `${WRAPPER_VH}vh` }}>
       <div
         ref={stageRef}
         data-phase="intro"
