@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 export default function LocalGuide() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <section className="bg-secondary pt-24 pb-24 text-center px-4 relative">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+      <section className="grain bg-secondary pt-24 pb-24 text-center px-4 relative">
         <div className="container relative z-10 max-w-4xl mx-auto">
           <h1 className="font-serif text-5xl md:text-7xl font-black text-white mb-6">
             The Local Guide
@@ -68,7 +67,7 @@ export default function LocalGuide() {
                 Our front desk staff at the Golden Host Resort are happy to provide local recommendations, call taxis, or help you navigate the Sarasota transit system.
               </p>
             </div>
-            <Button size="lg" className="rounded-full shrink-0" asChild>
+            <Button size="lg" className="shrink-0" asChild>
               <a href="https://maps.google.com/?q=4675+N+Tamiami+Trail+Sarasota+FL+34234" target="_blank" rel="noopener noreferrer">
                 <Map className="w-5 h-5 mr-2" /> Open Map
               </a>

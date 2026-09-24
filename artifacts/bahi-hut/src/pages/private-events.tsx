@@ -26,12 +26,12 @@ export default function PrivateEvents() {
                 Whether you're looking to reserve a corner of the bar for a birthday, rent out the entire lounge for a corporate mixer, or utilize the Golden Host Resort pool deck for a wedding or festival, we offer flexible spaces to accommodate 20 to 350 guests.
               </p>
               <div className="flex gap-4">
-                <Button size="lg" className="rounded-full px-8" asChild>
+                <Button size="lg" asChild>
                   <a href="https://www.bahihut.com/eventspace" target="_blank" rel="noopener noreferrer">
                     Inquire Online
                   </a>
                 </Button>
-                <Button variant="outline" size="lg" className="rounded-full px-8" asChild>
+                <Button variant="outline" size="lg" asChild>
                   <a href="tel:9413555141">
                     <Phone className="w-4 h-4 mr-2" /> (941) 355-5141
                   </a>
@@ -40,7 +40,7 @@ export default function PrivateEvents() {
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              <Card className="bg-card border-none shadow-lg">
+              <Card>
                 <CardContent className="p-6 text-center space-y-4">
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                     <CalendarHeart className="w-6 h-6" />
@@ -49,7 +49,7 @@ export default function PrivateEvents() {
                   <p className="text-sm text-muted-foreground">Unique midcentury backdrops for ceremonies and receptions.</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card border-none shadow-lg mt-8">
+              <Card className="mt-8">
                 <CardContent className="p-6 text-center space-y-4">
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                     <PartyPopper className="w-6 h-6" />
@@ -58,7 +58,7 @@ export default function PrivateEvents() {
                   <p className="text-sm text-muted-foreground">Reserve tables or private areas for your crew.</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card border-none shadow-lg -mt-8">
+              <Card className="-mt-8">
                 <CardContent className="p-6 text-center space-y-4">
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                     <Briefcase className="w-6 h-6" />
@@ -67,7 +67,7 @@ export default function PrivateEvents() {
                   <p className="text-sm text-muted-foreground">Break out of the boardroom with tropical networking.</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card border-none shadow-lg">
+              <Card>
                 <CardContent className="p-6 text-center space-y-4">
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                     <Users className="w-6 h-6" />

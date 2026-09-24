@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarIcon, Music, Mic, PartyPopper } from 'lucide-react';
 
@@ -76,7 +77,6 @@ export default function Events() {
             <Button 
               variant={activeFilter === null ? "default" : "outline"} 
               onClick={() => setActiveFilter(null)}
-              className="rounded-full"
             >
               All Events
             </Button>
@@ -85,7 +85,6 @@ export default function Events() {
                 key={tag}
                 variant={activeFilter === tag ? "default" : "outline"}
                 onClick={() => setActiveFilter(tag)}
-                className="rounded-full"
               >
                 {tag}
               </Button>
@@ -105,10 +104,10 @@ export default function Events() {
                 
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
-                    <span className="font-bold text-accent-foreground bg-accent/30 px-3 py-1 rounded-full text-sm w-fit">
+                    <Badge variant="accent" className="w-fit">
                       {event.day}
-                    </span>
-                    <span className="text-primary font-bold text-sm tracking-wide">
+                    </Badge>
+                    <span className="text-primary font-bold text-sm tracking-wide tabular-nums">
                       {event.time}
                     </span>
                   </div>

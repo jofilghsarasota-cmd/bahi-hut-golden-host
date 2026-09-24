@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import shopMugImg from '@assets/generated_images/shop-mug.jpg';
@@ -88,7 +89,7 @@ export default function Shop() {
                 key={cat}
                 variant={activeCategory === cat ? "default" : "outline"}
                 onClick={() => setActiveCategory(cat)}
-                className="capitalize rounded-full"
+                className="capitalize"
               >
                 {cat}
               </Button>
@@ -107,15 +108,11 @@ export default function Shop() {
                 <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center p-4">
                   {!item.inStock && (
                     <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                      <span className="bg-secondary text-secondary-foreground font-bold tracking-widest uppercase px-4 py-2 rounded-full text-xs">
-                        Out of Stock
-                      </span>
+                      <Badge variant="muted">Out of Stock</Badge>
                     </div>
                   )}
                   {item.sale && item.inStock && (
-                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase px-3 py-1 rounded-full text-[10px] z-10 shadow-sm">
-                      Sale
-                    </div>
+                    <Badge className="absolute right-4 top-4 z-10 shadow-sm">Sale</Badge>
                   )}
                   
                   {item.image ? (
@@ -135,11 +132,11 @@ export default function Shop() {
                 <div className="p-6 flex-1 flex flex-col">
                   <h3 className="font-serif font-bold text-lg text-foreground mb-1 leading-tight">{item.name}</h3>
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="font-bold text-lg text-primary">
+                    <span className="font-bold text-lg text-primary tabular-nums">
                       ${item.price.toFixed(2)}
                     </span>
                     {item.originalPrice && (
-                      <span className="text-sm text-muted-foreground line-through">
+                      <span className="text-sm text-muted-foreground line-through tabular-nums">
                         ${item.originalPrice.toFixed(2)}
                       </span>
                     )}
@@ -147,7 +144,7 @@ export default function Shop() {
                   
                   <div className="mt-auto">
                     <Button 
-                      className="w-full rounded-xl gap-2" 
+                      className="w-full" 
                       variant={item.inStock ? "default" : "secondary"}
                       disabled={!item.inStock}
                       asChild={item.inStock}
@@ -169,7 +166,7 @@ export default function Shop() {
           <div className="mt-16 text-center bg-accent/20 border border-accent/30 rounded-2xl p-8">
             <h3 className="font-serif text-2xl font-bold mb-2">Looking for more?</h3>
             <p className="text-muted-foreground mb-6">Our full inventory, including limited edition Tiki Fever merch, is available at the bar.</p>
-            <Button variant="outline" className="rounded-full bg-background" asChild>
+            <Button variant="outline" className="bg-background" asChild>
               <a href="https://www.bahihut.com/shop" target="_blank" rel="noopener noreferrer">
                 Visit Official Store
               </a>

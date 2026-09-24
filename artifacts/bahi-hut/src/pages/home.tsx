@@ -43,7 +43,7 @@ function OpenStatus() {
   }, []);
 
   return (
-    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 text-primary-foreground backdrop-blur-md border border-primary/30 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 text-white backdrop-blur-md border border-primary/30 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <span className="relative flex h-3 w-3">
         {status.open && (
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -58,10 +58,10 @@ function OpenStatus() {
 function HeroActions() {
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-      <Button size="lg" className="text-lg px-8 py-6 rounded-full w-full sm:w-auto shadow-xl" asChild>
+      <Button size="lg" className="w-full sm:w-auto" asChild>
         <Link href="/bahi-hut">Explore The Bar</Link>
       </Button>
-      <Button size="lg" variant="outline" className="text-lg px-8 py-6 rounded-full w-full sm:w-auto bg-white/10 text-white border-white/30 hover:bg-white hover:text-secondary backdrop-blur-sm" asChild>
+      <Button size="lg" variant="glass" className="w-full sm:w-auto" asChild>
         <a href="https://booking.hotelkeyapp.com/v2/index.html#/booking/search?pc=1055&property_id=dcb4a0ce-88b0-45b0-a4c8-e01bb6a6ad07&url=https%3A%2F%2Fwww.bahihut.com%2Fghresort" target="_blank" rel="noopener noreferrer">
           Book a Room
         </a>
@@ -140,12 +140,12 @@ function BarHold() {
       </p>
 
       <div className="reveal mt-10 w-full flex flex-col sm:flex-row items-center justify-center gap-4" style={delay(1000)}>
-        <Button size="lg" className="text-lg px-8 py-6 rounded-full w-full sm:w-auto shadow-xl transition-[color,background-color,border-color,transform] hover:-translate-y-0.5" asChild>
+        <Button size="lg" className="w-full sm:w-auto" asChild>
           <a href="https://ghresort.square.site/#items" target="_blank" rel="noopener noreferrer">
             View Food Menu
           </a>
         </Button>
-        <Button size="lg" variant="outline" className="text-lg px-8 py-6 rounded-full w-full sm:w-auto bg-white/10 text-white border-white/30 hover:bg-white hover:text-secondary backdrop-blur-sm transition-[color,background-color,border-color,transform] hover:-translate-y-0.5" asChild>
+        <Button size="lg" variant="glass" className="w-full sm:w-auto" asChild>
           <Link href="/shop">Shop Mugs</Link>
         </Button>
       </div>
@@ -219,7 +219,7 @@ export default function Home() {
               <p className="text-lg text-muted-foreground leading-relaxed">
                 Whether you're a local regular or a weary traveler checking into the Golden Host Resort next door, our legendary Mai Tais are waiting.
               </p>
-              <Button variant="link" className="text-primary font-bold text-lg p-0 h-auto group" asChild>
+              <Button variant="link" className="h-auto p-0 text-lg font-bold group" asChild>
                 <Link href="/bahi-hut" className="flex items-center gap-2">
                   Read our history <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
@@ -252,7 +252,7 @@ export default function Home() {
                 <p className="text-muted-foreground mb-8 flex-1">
                   Renovated in 2022. Enjoy our 50-foot heated saltwater pool, free WiFi, and vintage Florida architecture right next door.
                 </p>
-                <Button className="w-full rounded-xl" asChild>
+                <Button className="w-full" asChild>
                   <Link href="/resort">Explore the Resort</Link>
                 </Button>
               </div>
@@ -272,7 +272,7 @@ export default function Home() {
                 <p className="text-muted-foreground mb-8 flex-1">
                   Drag Queen Bingo on Sundays, Karaoke Thursdays, and live music all weekend. There's always a party at the hut.
                 </p>
-                <Button className="w-full rounded-xl" variant="secondary" asChild>
+                <Button className="w-full" variant="secondary" asChild>
                   <Link href="/events">View Calendar</Link>
                 </Button>
               </div>
@@ -280,8 +280,7 @@ export default function Home() {
 
             {/* Private Events */}
             <div className="group relative rounded-3xl overflow-hidden bg-background shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full border border-border">
-              <div className="aspect-video bg-primary p-8 flex items-center justify-center text-primary-foreground text-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+              <div className="grain aspect-video bg-primary p-8 flex items-center justify-center text-primary-foreground text-center relative overflow-hidden">
                 <h4 className="font-serif text-4xl font-black italic relative z-10">20 to 350<br/>Guests</h4>
               </div>
               <div className="p-8 flex-1 flex flex-col">
@@ -293,7 +292,7 @@ export default function Home() {
                 <p className="text-muted-foreground mb-8 flex-1">
                   Reserve a corner of the bar for a birthday, rent the whole lounge for a mixer, or take over the resort pool deck for a wedding.
                 </p>
-                <Button className="w-full rounded-xl bg-accent text-accent-foreground hover:bg-accent/90" asChild>
+                <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90" asChild>
                   <Link href="/private-events">Plan an Event</Link>
                 </Button>
               </div>
@@ -311,12 +310,12 @@ export default function Home() {
           <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Find Your Escape</h2>
           <p className="text-xl mb-8 font-medium">4675 N Tamiami Trail, Sarasota FL 34234</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white hover:text-secondary rounded-full px-8" asChild>
+            <Button size="lg" variant="glass" asChild>
               <a href="https://maps.google.com/?q=4675+N+Tamiami+Trail+Sarasota+FL+34234" target="_blank" rel="noopener noreferrer">
                 Get Directions
               </a>
             </Button>
-            <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white hover:text-secondary rounded-full px-8" asChild>
+            <Button size="lg" variant="glass" asChild>
               <a href="tel:9413555141">
                 (941) 355-5141
               </a>
