@@ -167,7 +167,7 @@
   }
   /* Rounded, sign-painted serifs everywhere except the hero, which is tuned
      separately (see the scroll story below). */
-  :where(h1, h2, h3, h4, h5, h6):not(.story *, .walk *) {
+  :where(h1, h2, h3, h4, h5, h6):not(.story *, .walk *, .escape *) {
     font-variation-settings: 'SOFT' 100;
   }
   h1 {
@@ -238,7 +238,7 @@
 
 /* Pages set heading weights with utilities (font-black, font-bold), which
    beat @layer base. Unlayered, this steps them down one notch in lounge. */
-[data-theme='lounge'] :is(h1, h2, h3, h4, h5, h6, .type-display):not(.story *, .walk *, [data-theme='sun'] *) {
+[data-theme='lounge'] :is(h1, h2, h3, h4, h5, h6, .type-display):not(.story *, .walk *, .escape *, [data-theme='sun'] *) {
   &.font-black,
   &.type-display {
     font-weight: 800;
@@ -611,9 +611,155 @@ section > .story-tint {
 .walk-photo {
   opacity: var(--shown, 0);
 }
-.walk-photo img {
-  transform: scale(calc(1.02 + var(--push, 0) * 0.16));
+/* Specific enough to beat the `animation` shorthands below. */
+.walk[data-inview='false'] *,
+.walk-photo[data-on='false'] * {
+  animation-play-state: paused;
+}
+
+/* A step's dip and sway, plus a lazy follow of the pointer. */
+.walk-camera {
+  transform: translate3d(
+      calc(var(--mx, 0) * -10px),
+      calc(var(--bob, 0) * 5px + var(--my, 0) * -8px),
+      0
+    )
+    rotate(calc(var(--sway, 0) * 0.22deg));
+}
+
+/* Behaves like object-fit: cover with object-position at the focus point,
+   but as a box, so the lights inside it stay on their bulbs. */
+.walk-cover {
+  position: absolute;
+  left: var(--fx);
+  top: var(--fy);
+  width: max(100%, calc(100vh * var(--ar)));
+  width: max(100%, calc(100svh * var(--ar)));
+  aspect-ratio: var(--ar);
+  translate: calc(var(--fx) * -1) calc(var(--fy) * -1);
+  transform-origin: var(--fx) var(--fy);
+  transform: scale(calc(1.04 + var(--push, 0) * 0.16));
   will-change: transform;
+}
+
+/* A bulb in the photo catching and losing the light. */
+.walk-glint {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  translate: -50% -50%;
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle,
+    hsl(0 0% 100% / 0.95) 0 8%,
+    hsl(var(--c) / 0.8) 18%,
+    hsl(var(--c) / 0.25) 40%,
+    transparent 70%
+  );
+  animation: walk-twinkle var(--t) ease-in-out var(--d) infinite;
+}
+.walk-glint[data-flare]::before,
+.walk-glint[data-flare]::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 320%;
+  height: 1px;
+  translate: -50% -50%;
+  background: linear-gradient(90deg, transparent, hsl(var(--c) / 0.9), transparent);
+}
+.walk-glint[data-flare]::after {
+  rotate: 90deg;
+}
+
+/* Light sources: lamps breathe, the Aloha sign buzzes like old neon. */
+.walk-glow {
+  position: absolute;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  background: radial-gradient(closest-side, hsl(var(--c) / 0.55), hsl(var(--c) / 0.18) 55%, transparent);
+  animation: walk-breathe 5s ease-in-out var(--d) infinite alternate;
+}
+.walk-glow[data-kind='neon'] {
+  animation: walk-neon 4.2s steps(1, end) var(--d) infinite;
+}
+
+/* Out-of-focus lights between the camera and the scene. Nearer ones (--z)
+   are bigger and slide past faster as the walk moves on. */
+.walk-bokeh {
+  top: 0;
+  height: 200%;
+}
+.walk-bokeh > span {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle,
+    hsl(var(--glow-h, 225) 95% 72% / var(--a)) 0,
+    hsl(var(--glow-h, 225) 95% 62% / calc(var(--a) * 0.5)) 45%,
+    transparent 70%
+  );
+  box-shadow: inset 0 0 0 1px hsl(var(--glow-h, 225) 95% 80% / calc(var(--a) * 0.35));
+  translate: calc(var(--mx, 0) * var(--z) * -30px) calc(var(--walk, 0) * (0.3 + var(--z)) * -100vh);
+  animation: walk-drift var(--t) ease-in-out var(--d) infinite alternate;
+}
+
+/* A light leak that flares across each cut, tinted by the photo coming in. */
+.walk-leak {
+  inset: 0 -75%;
+  opacity: var(--leak, 0);
+  mix-blend-mode: screen;
+  transform: translateX(calc((var(--leak-x, 0) - 0.5) * 40%));
+  background: linear-gradient(
+    105deg,
+    transparent 22%,
+    hsl(var(--glow-h, 225) 100% 60% / 0.35) 38%,
+    hsl(38 100% 75% / 0.45) 50%,
+    hsl(var(--glow-h, 225) 100% 60% / 0.3) 62%,
+    transparent 78%
+  );
+}
+
+/* The caption word that names the light glows in its color. */
+.beat-glow {
+  color: color-mix(in srgb, white 72%, hsl(var(--c)));
+  animation: walk-caption-glow 3.6s ease-in-out infinite;
+}
+
+@keyframes walk-twinkle {
+  0%, 100% { opacity: 0.15; scale: 0.6; }
+  45% { opacity: 1; scale: 1; }
+  55% { opacity: 0.85; scale: 1.12; }
+}
+@keyframes walk-breathe {
+  from { opacity: 0.35; scale: 0.92; }
+  to { opacity: 0.9; scale: 1.05; }
+}
+@keyframes walk-neon {
+  0% { opacity: 0.9; }
+  4% { opacity: 0.4; }
+  6% { opacity: 0.95; }
+  9% { opacity: 0.5; }
+  11% { opacity: 1; }
+  58% { opacity: 0.85; }
+  60% { opacity: 0.3; }
+  61% { opacity: 0.9; }
+}
+@keyframes walk-drift {
+  from { transform: translate3d(0, 0, 0); opacity: 0.55; }
+  to { transform: translate3d(1.5rem, -2.5rem, 0); opacity: 1; }
+}
+@keyframes walk-caption-glow {
+  0%, 100% { text-shadow: 0 0 14px hsl(var(--c) / 0.55), 0 0 36px hsl(var(--c) / 0.3); }
+  50% { text-shadow: 0 0 20px hsl(var(--c) / 0.85), 0 0 54px hsl(var(--c) / 0.5); }
+  52% { text-shadow: 0 0 10px hsl(var(--c) / 0.4), 0 0 24px hsl(var(--c) / 0.2); }
+  54% { text-shadow: 0 0 20px hsl(var(--c) / 0.85), 0 0 54px hsl(var(--c) / 0.5); }
 }
 /* Night-walk grade: keeps captions legible and the four photos in one key. */
 .walk-shade {
@@ -651,6 +797,39 @@ section > .story-tint {
   background: hsl(var(--primary));
   transform: scaleX(var(--walk, 0));
   transform-origin: left;
+}
+
+/* ---------------------------------------------------------------------------
+   Find Your Escape dive (components/escape-dive.tsx)
+   The stage's data-phase is dive or hold; --scrim is written per frame.
+   Beats reuse the lounge beat styles; the hold reuses the .reveal* classes.
+   ------------------------------------------------------------------------ */
+.escape-media {
+  transition:
+    filter 1.1s var(--ease-out-soft),
+    transform 1.4s var(--ease-out-soft);
+}
+.escape[data-phase='hold'] .escape-media {
+  filter: blur(14px) saturate(1.1);
+  transform: scale(1.06);
+}
+
+/* Daylight is bright: a teal wash and deep vignette keep the hold legible. */
+.escape-tint {
+  opacity: 0;
+  transition: opacity 1.1s var(--ease-out-soft);
+  background:
+    radial-gradient(ellipse at center, hsl(175 45% 10% / 0.35) 10%, hsl(175 45% 10% / 0.65) 70%, hsl(175 45% 6% / 0.9) 100%),
+    linear-gradient(to bottom, hsl(175 45% 12% / 0.3), hsl(var(--primary) / 0.12));
+}
+.escape[data-phase='hold'] .escape-tint,
+section > .escape-tint {
+  opacity: 1;
+}
+
+.escape-scrim {
+  opacity: var(--scrim, 0);
+  background: linear-gradient(to top, hsl(175 45% 6% / 0.9) 0%, hsl(175 45% 6% / 0.55) 38%, transparent 68%);
 }
 
 /* ---------------------------------------------------------------------------

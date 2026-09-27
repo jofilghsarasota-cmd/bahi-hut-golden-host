@@ -3,13 +3,13 @@ import heroVideo from '@assets/generated_images/hero-tiki.mp4';
 import heroPoster from '@assets/generated_images/hero-tiki-poster.jpg';
 import loungeVideo from '@assets/generated_images/lounge-scrub.mp4';
 import loungePoster from '@assets/generated_images/lounge-poster.jpg';
+import { clamp01, easeFactor, maxTime, primeVideo, seekTo, smoothstep } from '@/lib/scroll-scrub';
 
 // The hero is one pinned scene that scrubs two videos in a row:
 //
 //   hero video  ->  hold ("since 1954")  ->  lounge video  ->  hold (the bar)
 //
-// Both videos are encoded with every frame a keyframe so scroll seeks are
-// cheap. The hero video ends on the blue door and the lounge video starts on
+// The hero video ends on the blue door and the lounge video starts on
 // the same door; the swap happens while the frame is blurred, so it reads as
 // one continuous camera move.
 const HERO_SRC = heroVideo;
@@ -42,20 +42,8 @@ const BEAT_TIMING = [
   { enter: [0.56, 0.68], exit: [0.84, 0.92] },
 ] as const;
 
-// Kept a hair before the true end so the browser reliably renders the last
-// frame instead of occasionally clamping/blanking exactly at duration.
-const END_EPSILON_SECONDS = 0.05;
-
-// How quickly the scene catches up to the scroll position each frame (0-1).
-// Lower = smoother/laggier trailing motion, higher = snappier/closer to 1:1.
-const SMOOTHING = 0.12;
-
 // Once the eased position is this close to the target, snap and stop animating.
 const SETTLE_THRESHOLD_VH = 0.01;
-
-// Skip seeks smaller than half a frame - they wouldn't change the picture,
-// just cost a decode.
-const MIN_SEEK_DELTA_SECONDS = 1 / 60;
 
 type Phase = 'intro' | 'hero-hold' | 'lounge' | 'lounge-hold';
 const PHASE_ORDER: Phase[] = ['intro', 'hero-hold', 'lounge', 'lounge-hold'];
@@ -76,47 +64,6 @@ interface ScrollScrubHeroProps {
   // Shown on the blurred last frame of the lounge video.
   loungeEndContent?: ReactNode;
 }
-
-const clamp01 = (x: number) => Math.min(Math.max(x, 0), 1);
-
-const smoothstep = (from: number, to: number, x: number) => {
-  const t = clamp01((x - from) / (to - from));
-  return t * t * (3 - 2 * t);
-};
-
-// Seek only once the previous seek has finished decoding. Seeking every frame
-// cancels in-flight seeks before they paint, which makes scrubbing jittery.
-const seekTo = (video: HTMLVideoElement, time: number) => {
-  if (
-    !video.seeking &&
-    Number.isFinite(time) &&
-    Math.abs(video.currentTime - time) > MIN_SEEK_DELTA_SECONDS
-  ) {
-    video.currentTime = time;
-  }
-};
-
-const maxTime = (video: HTMLVideoElement) =>
-  Math.max(video.duration - END_EPSILON_SECONDS, 0);
-
-// iOS Safari won't render frames reached via `currentTime` seeks until the
-// video has actually played at least once. A muted, near-instant play/pause
-// "primes" the decoder so later scroll-driven seeks show up.
-const primeVideo = (video: HTMLVideoElement, onPrimed: () => void) => {
-  const playing = video.play();
-  if (playing && typeof playing.then === 'function') {
-    playing
-      .then(() => {
-        video.pause();
-        onPrimed();
-      })
-      .catch(() => {
-        /* Autoplay can be blocked; scrubbing still works once the user interacts. */
-      });
-  } else {
-    video.pause();
-  }
-};
 
 export default function ScrollScrubHero({
   children,
@@ -246,10 +193,9 @@ export default function ScrollScrubHero({
     };
 
     const tick = (timestamp: number) => {
-      // Frame-rate independent easing, so 120Hz and 60Hz screens feel the same.
       const elapsed = lastTimestamp ? Math.min(timestamp - lastTimestamp, 100) : 16.67;
       lastTimestamp = timestamp;
-      const factor = 1 - Math.pow(1 - SMOOTHING, elapsed / 16.67);
+      const factor = easeFactor(elapsed);
 
       const target = getTarget();
       const delta = target - eased;
