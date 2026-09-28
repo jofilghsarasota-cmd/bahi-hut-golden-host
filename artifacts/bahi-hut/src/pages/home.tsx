@@ -218,6 +218,7 @@ export default function Home() {
   const tikiCursor = useRef<{ x: number; y: number } | null>(null);
   const tikiRaf = useRef<number | null>(null);
   const waypointIdx = useRef(0);
+  const tikiScale = useRef(1);
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -265,7 +266,11 @@ export default function Home() {
       const dy = targetY - tikiPos.current.y;
       const rot = dx * 0.12;
 
-      el.style.transform = `translate(${tikiPos.current.x - 90}px, ${tikiPos.current.y - 90}px) rotate(${rot}deg)`;
+      const targetScale = cursor ? 1.6 : 1;
+      tikiScale.current += (targetScale - tikiScale.current) * 0.03;
+      const s = tikiScale.current;
+
+      el.style.transform = `translate(${tikiPos.current.x - 90}px, ${tikiPos.current.y - 90}px) rotate(${rot}deg) scale(${s})`;
       el.style.opacity = '0.2';
 
       if (!cursor && Math.abs(dx) < 2 && Math.abs(dy) < 2) {
