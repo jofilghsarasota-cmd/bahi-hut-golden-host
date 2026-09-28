@@ -1,97 +1,118 @@
 import { Button } from '@/components/ui/button';
+import { Reveal } from '@/components/reveal';
 import { BedDouble, Wifi, Waves, CheckCircle2 } from 'lucide-react';
-import poolImg from '@assets/generated_images/resort-pool.jpg';
-import heroImg from '@assets/generated_images/hero-tiki.jpg';
+import heroImg from '@assets/gh_lobby.jpg';
+import poolImg from '@assets/lost-at-sea-selects/pool-tiki-totem.jpg';
+
+const AMENITIES = [
+  { icon: Waves, title: '50-Foot Pool', description: 'Heated saltwater pool surrounded by palms.' },
+  { icon: Wifi, title: 'Free Wi-Fi', description: 'Stay connected throughout the property.' },
+  { icon: CheckCircle2, title: 'Check-In: 3PM - 10PM', description: 'Early check-in based on availability.' },
+  { icon: CheckCircle2, title: 'Check-Out: 11AM', description: 'Late check-out upon request.' },
+];
 
 export default function Resort() {
   return (
     <div className="flex flex-col">
-      {/* Hero */}
-      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-secondary">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={heroImg} 
-            alt="Golden Host Resort Exterior" 
-            className="w-full h-full object-cover opacity-60 mix-blend-overlay"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent" />
-        </div>
-        
-        <div className="container relative z-10 mx-auto px-4 text-center">
-          <h1 className="font-serif text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-md">
-            Golden Host Resort
-          </h1>
-          <p className="text-xl md:text-2xl text-white/90 font-medium max-w-2xl mx-auto">
-            Midcentury modern architecture meets authentic Old Florida hospitality. Fully renovated in 2022.
-          </p>
+      {/* Hero: full-bleed lobby photo (grain-matched to the rest of the
+          site) instead of a washed-out, dead-centered band - bottom-anchored
+          copy plus the booking CTA pulled up here, since it used to live
+          only after a full scroll past the amenities grid. */}
+      <section className="relative h-[92vh] min-h-[560px] flex items-end overflow-hidden bg-secondary">
+        <img
+          src={heroImg}
+          alt="Golden Host Resort Lobby"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/50 to-secondary/10" />
+        <div aria-hidden="true" className="grain absolute inset-0" />
+
+        <div className="container relative z-10 mx-auto px-4 pb-20 md:pb-28">
+          <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <span className="eyebrow text-white/90">Adjacent to the Bahi Hut</span>
+            <h1 className="font-serif text-5xl md:text-7xl font-black text-white mt-4 drop-shadow-md">
+              Golden Host Resort
+            </h1>
+            <p className="mt-6 max-w-[55ch] text-lg md:text-xl text-white/85 leading-relaxed">
+              Midcentury modern architecture meets authentic Old Florida hospitality. Fully renovated in 2022.
+            </p>
+            <div className="mt-8">
+              <Button size="lg" asChild>
+                <a
+                  href="https://booking.hotelkeyapp.com/v2/index.html#/booking/search?pc=1055&property_id=dcb4a0ce-88b0-45b0-a4c8-e01bb6a6ad07&url=https%3A%2F%2Fwww.bahihut.com%2Fghresort"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <BedDouble className="w-5 h-5 mr-2" /> Book Your Stay
+                </a>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Main Content */}
+      {/* Intro: photo + copy only - the booking CTA now lives in the hero,
+          so it isn't repeated here, and amenities get their own section
+          below instead of crowding this one. */}
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div className="order-2 md:order-1 relative">
+            <Reveal as="div" className="order-2 md:order-1 relative">
               <div className="rounded-3xl overflow-hidden shadow-2xl relative z-10 border-8 border-white">
-                <img src={poolImg} alt="50-foot heated saltwater pool" className="w-full h-auto aspect-square object-cover" />
+                <img src={poolImg} alt="Guests relaxing poolside by a carved tiki totem" className="w-full h-auto aspect-square object-cover" />
               </div>
               <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-primary/20 rounded-full -z-10 blur-3xl"></div>
-            </div>
-            
-            <div className="order-1 md:order-2 space-y-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/30 text-accent-foreground text-sm font-bold tracking-wide">
-                Established 1954 • Renovated 2022
-              </div>
+            </Reveal>
+
+            <Reveal as="div" delayMs={150} className="order-1 md:order-2 space-y-8">
+              <span className="eyebrow">Stay With Us</span>
               <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground leading-tight">
                 Your oasis on the Tamiami Trail.
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
                 The Golden Host Resort offers a uniquely Sarasota experience. Instead of a generic corporate hotel, stay in a lovingly preserved piece of midcentury modern architecture that celebrates the spirit of Old Florida.
               </p>
-              
-              <div className="grid grid-cols-2 gap-6 pt-4">
-                <div className="flex flex-col gap-2">
-                  <Waves className="w-8 h-8 text-primary" />
-                  <h4 className="font-bold text-foreground">50-Foot Pool</h4>
-                  <p className="text-sm text-muted-foreground">Heated saltwater pool surrounded by palms.</p>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Wifi className="w-8 h-8 text-primary" />
-                  <h4 className="font-bold text-foreground">Free Wi-Fi</h4>
-                  <p className="text-sm text-muted-foreground">Stay connected throughout the property.</p>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <CheckCircle2 className="w-8 h-8 text-primary" />
-                  <h4 className="font-bold text-foreground">Check-In: 3PM</h4>
-                  <p className="text-sm text-muted-foreground">Early check-in based on availability.</p>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <CheckCircle2 className="w-8 h-8 text-primary" />
-                  <h4 className="font-bold text-foreground">Check-Out: 11AM</h4>
-                  <p className="text-sm text-muted-foreground">Late check-out upon request.</p>
-                </div>
-              </div>
-
-              <div className="pt-8">
-                <Button size="lg" className="w-full sm:w-auto" asChild>
-                  <a href="https://booking.hotelkeyapp.com/v2/index.html#/booking/search?pc=1055&property_id=dcb4a0ce-88b0-45b0-a4c8-e01bb6a6ad07&url=https%3A%2F%2Fwww.bahihut.com%2Fghresort" target="_blank" rel="noopener noreferrer">
-                    <BedDouble className="w-5 h-5 mr-2" /> Book Your Stay
-                  </a>
-                </Button>
-              </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Tiki Fever Promo */}
-      <section className="py-24 bg-card border-y border-border">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
-          <h2 className="font-serif text-4xl font-bold text-foreground mb-6">Home of Tiki Fever</h2>
-          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            The Golden Host Resort is the official home of Tiki Fever, Sarasota's premier celebration of Polynesian pop culture, midcentury style, and tropical cocktails.
-          </p>
-          <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground" asChild>
+      {/* Amenities: its own divided strip (echoing the Events schedule
+          layout) instead of a cramped 2x2 grid squeezed under the intro
+          copy - gives the property specifics room to breathe. */}
+      <section className="py-20 md:py-24 px-4 bg-card border-y border-border">
+        <div className="container mx-auto max-w-6xl">
+          <Reveal>
+            <span className="eyebrow">At the Property</span>
+          </Reveal>
+          <div className="mt-8 grid sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 divide-border">
+            {AMENITIES.map((item, i) => (
+              <Reveal
+                key={item.title}
+                delayMs={i * 80}
+                className="py-6 sm:py-0 sm:px-6 first:pl-0 sm:border-l sm:border-border first:sm:border-l-0"
+              >
+                <item.icon className="w-8 h-8 text-primary" aria-hidden="true" />
+                <h4 className="mt-3 font-bold text-foreground">{item.title}</h4>
+                <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tiki Fever Promo: grain-textured teal band, matching the CTA
+          treatment used to close out the other pages. */}
+      <section className="grain relative overflow-hidden bg-secondary px-4 py-16 text-secondary-foreground md:py-20">
+        <div className="container relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 text-center md:flex-row md:items-center md:justify-between md:text-left">
+          <div>
+            <h2 className="font-serif text-2xl font-bold md:text-3xl">Home of Tiki Fever</h2>
+            <p className="mt-3 max-w-md text-secondary-foreground/80">
+              Sarasota's premier celebration of Polynesian pop culture, midcentury style, and tropical cocktails,
+              hosted right here at the Golden Host.
+            </p>
+          </div>
+          <Button size="lg" variant="glass" className="shrink-0" asChild>
             <a href="https://www.tikifever.com" target="_blank" rel="noopener noreferrer">
               Discover Tiki Fever
             </a>

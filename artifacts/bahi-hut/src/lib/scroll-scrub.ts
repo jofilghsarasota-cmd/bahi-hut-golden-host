@@ -1,6 +1,6 @@
-// Helpers shared by the scroll-scrubbed video scenes (the home hero and the
-// Find Your Escape dive). Their videos are encoded with every frame a
-// keyframe so scroll seeks are cheap.
+// Helpers shared by the video scenes that seek frame by frame (the home hero
+// and the Find Your Escape dive). Their videos are encoded with every frame a
+// keyframe so seeks are cheap.
 
 // Kept a hair before the true end so the browser reliably renders the last
 // frame instead of occasionally clamping/blanking exactly at duration.

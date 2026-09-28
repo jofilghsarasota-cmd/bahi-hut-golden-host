@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, Palmtree, Calendar, ShoppingBag, GlassWater, BedDouble, Info, Map, Phone } from 'lucide-react';
 import { SiteFooter } from '@/components/site-footer';
+import { ScrollProgressIcon } from '@/components/scroll-progress-icon';
 import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
@@ -212,6 +213,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </main>
 
       <SiteFooter />
+      <ScrollProgressIcon />
     </div>
   );
 }
