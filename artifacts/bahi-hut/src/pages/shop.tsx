@@ -1,11 +1,9 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import shopMugImg from '@assets/generated_images/shop-mug.jpg';
-import tikiMotif from '@assets/bg.avif';
-
-const motifStyle = { '--motif-image': `url(${tikiMotif})` } as CSSProperties;
+import shopHeroImg from '@assets/generated_images/_MRZ7459.jpeg';
 
 const SHOP_ITEMS = [
   {
@@ -64,6 +62,24 @@ const SHOP_ITEMS = [
 
 export default function Shop() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const heroRef = useRef<HTMLElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    const img = imgRef.current;
+    if (!hero || !img) return;
+
+    const onScroll = () => {
+      const { top, height } = hero.getBoundingClientRect();
+      const progress = -top / (height + window.innerHeight);
+      img.style.transform = `translateY(${progress * 40}%)`;
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const categories = ['all', ...Array.from(new Set(SHOP_ITEMS.map(i => i.category)))];
 
@@ -75,21 +91,34 @@ export default function Shop() {
     <div className="flex flex-col min-h-screen bg-background">
       {/* Hero: left-aligned grain surface, matching Local Guide's sun-theme
           treatment instead of the flat teal band. */}
-      <section className="grain motif relative overflow-hidden pt-28 pb-16 px-4 md:pt-36 md:pb-24" style={motifStyle}>
+      <section ref={heroRef} className="relative overflow-hidden pt-28 pb-16 px-4 md:pt-36 md:pb-20">
+        <img
+          ref={imgRef}
+          src={shopHeroImg}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full object-cover object-center will-change-transform"
+          style={{ height: '140%', top: '-20%' }}
+        />
+        {/* base dark scrim */}
+        <div className="absolute inset-0 bg-black/45" />
+        {/* warm amber highlight blooming up from the bottom edge */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-amber-900/60 via-amber-700/20 to-transparent" />
+        {/* soft vignette on the sides */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20" />
         <div className="container relative z-10 mx-auto max-w-4xl">
-          <span className="eyebrow animate-in fade-in slide-in-from-bottom-2 duration-700">Take It Home</span>
-          <h1 className="type-display mt-4 text-foreground animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+          <span className="eyebrow animate-in fade-in slide-in-from-bottom-2 duration-700 text-white/70">Take It Home</span>
+          <h1 className="type-display mt-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
             The Hut Shop
           </h1>
-          <p className="mt-6 max-w-[60ch] text-lg text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+          <p className="mt-6 max-w-[60ch] text-lg text-white/80 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
             Take a piece of the legend home with you. Official Bahi Hut and Golden Host merchandise.
           </p>
         </div>
       </section>
 
-      <section className="pt-0 pb-8">
+      <section className="pt-8 pb-8">
         <div className="container mx-auto px-4">
-          {/* Filter: quiet pill toggles instead of a row of bordered buttons. */}
           <div className="flex flex-wrap justify-center gap-2 border-b border-border pb-8">
             {categories.map(cat => (
               <Button

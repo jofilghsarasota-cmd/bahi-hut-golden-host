@@ -1,7 +1,8 @@
+import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Reveal } from '@/components/reveal';
 import { BedDouble, Wifi, Waves, CheckCircle2 } from 'lucide-react';
-import heroImg from '@assets/gh_lobby.jpg';
+import heroImg from '@assets/generated_images/_MRZ1902.JPG';
 import poolImg from '@assets/lost-at-sea-selects/pool-tiki-totem.jpg';
 
 const AMENITIES = [
@@ -12,19 +13,41 @@ const AMENITIES = [
 ];
 
 export default function Resort() {
+  const heroRef = useRef<HTMLElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    const img = imgRef.current;
+    if (!hero || !img) return;
+
+    const onScroll = () => {
+      const { top, height } = hero.getBoundingClientRect();
+      const progress = -top / (height + window.innerHeight);
+      img.style.transform = `translateY(${progress * 40}%)`;
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <div className="flex flex-col">
-      {/* Hero: full-bleed lobby photo (grain-matched to the rest of the
-          site) instead of a washed-out, dead-centered band - bottom-anchored
-          copy plus the booking CTA pulled up here, since it used to live
-          only after a full scroll past the amenities grid. */}
-      <section className="relative h-[92vh] min-h-[560px] flex items-end overflow-hidden bg-secondary">
+      <section ref={heroRef} className="relative h-[92vh] min-h-[560px] flex items-end overflow-hidden bg-secondary">
         <img
+          ref={imgRef}
           src={heroImg}
           alt="Golden Host Resort Lobby"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full object-cover will-change-transform"
+          style={{ height: '140%', top: '-20%' }}
         />
+        {/* base dark-to-secondary scrim */}
         <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/50 to-secondary/10" />
+        {/* warm amber highlight at the bottom edge */}
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-amber-900/55 via-amber-700/20 to-transparent" />
+        {/* side vignette */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20" />
         <div aria-hidden="true" className="grain absolute inset-0" />
 
         <div className="container relative z-10 mx-auto px-4 pb-20 md:pb-28">

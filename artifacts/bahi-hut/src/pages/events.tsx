@@ -1,10 +1,8 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import tikiMotif from '@assets/bg.avif';
 import backbarImg from '@assets/lost-at-sea-selects/band-drummer.jpg';
-
-const motifStyle = { '--motif-image': `url(${tikiMotif})` } as CSSProperties;
+import eventsHeroImg from '@assets/generated_images/MKD_2793.jpg';
 
 type WeeklyEvent = {
   day: string;
@@ -109,6 +107,24 @@ function GroupHeading({ children }: { children: string }) {
 
 export default function Events() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    const img = imgRef.current;
+    if (!hero || !img) return;
+
+    const onScroll = () => {
+      const { top, height } = hero.getBoundingClientRect();
+      const progress = -top / (height + window.innerHeight);
+      img.style.transform = `translateY(${progress * 40}%)`;
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const allTags = Array.from(new Set(WEEKLY_EVENTS.flatMap((e) => e.tags)));
   const filteredEvents = activeFilter ? WEEKLY_EVENTS.filter((e) => e.tags.includes(activeFilter)) : WEEKLY_EVENTS;
   const signatureEvent = WEEKLY_EVENTS.find((e) => e.signature);
@@ -118,19 +134,30 @@ export default function Events() {
       {/* Hero: dark, grain-textured surface instead of a flat teal band -
           reads as after-dark nightlife rather than a repeat of the old
           centered hero used on every page. */}
-      <section className="grain motif relative overflow-hidden pt-28 pb-16 px-4 md:pt-36 md:pb-24" style={motifStyle}>
+      <section ref={heroRef} className="relative overflow-hidden pt-28 pb-16 px-4 md:pt-36 md:pb-20">
+        <img
+          ref={imgRef}
+          src={eventsHeroImg}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full object-cover object-center will-change-transform"
+          style={{ height: '140%', top: '-20%' }}
+        />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-amber-900/60 via-amber-700/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20" />
         <div className="container relative z-10 mx-auto max-w-4xl">
-          <span className="eyebrow animate-in fade-in slide-in-from-bottom-2 duration-700">Live at the Hut</span>
-          <h1 className="type-display mt-4 text-foreground animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+          <span className="eyebrow animate-in fade-in slide-in-from-bottom-2 duration-700 text-white/70">Live at the Hut</span>
+          <h1 className="type-display mt-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
             Weekly Events
           </h1>
-          <p className="mt-6 max-w-[60ch] text-lg text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+          <p className="mt-6 max-w-[60ch] text-lg text-white/80 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
             There's always something happening at the Hut. Events and times are subject to change.
           </p>
         </div>
       </section>
 
-      <section className="pb-20 md:pb-28">
+      <section className="pt-8 pb-20 md:pb-28">
         <div className="container mx-auto max-w-6xl px-4">
           <div className="grid md:grid-cols-[1fr_320px] gap-10 md:gap-14 items-start">
             <div className="max-w-4xl">
