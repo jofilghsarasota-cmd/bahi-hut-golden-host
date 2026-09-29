@@ -3,7 +3,7 @@ import diveVideo from '@assets/generated_images/escape-dive.mp4';
 import divePoster from '@assets/generated_images/escape-dive-poster.jpg';
 import diveEnd from '@assets/generated_images/escape-dive-end.jpg';
 import { clamp01, easeFactor, maxTime, primeVideo, seekTo, smoothstep } from '@/lib/scroll-scrub';
-import type { LoungeBeat } from '@/components/scroll-scrub-hero';
+import type { LoungeBeat } from '@/components/autoplay-hero';
 
 // A pinned scene that scrubs one aerial video with the scroll, the same way
 // the home hero does:

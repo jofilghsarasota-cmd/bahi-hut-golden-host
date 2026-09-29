@@ -18,7 +18,7 @@ describe('Shell', () => {
   // and a sun ancestor switches off lounge `dark:` styles and heading weights.
   it.each([
     ['/events', 'bg-koa'],
-    ['/shop', 'bg-sand'],
+    ['/shop', 'bg-koa'],
   ])('paints the wrapper behind the header in the page theme (%s)', (path, surface) => {
     const wrapper = render(path).match(/^<div[^>]*>/)?.[0] ?? '';
     expect(wrapper).not.toContain('data-theme');

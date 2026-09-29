@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import shopMugImg from '@assets/generated_images/shop-mug.jpg';
+import shopHeroImg from '@assets/generated_images/_MRZ7459.jpeg';
 
 const SHOP_ITEMS = [
   {
@@ -61,33 +62,69 @@ const SHOP_ITEMS = [
 
 export default function Shop() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const heroRef = useRef<HTMLElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    const img = imgRef.current;
+    if (!hero || !img) return;
+
+    const onScroll = () => {
+      const { top, height } = hero.getBoundingClientRect();
+      const progress = -top / (height + window.innerHeight);
+      img.style.transform = `translateY(${progress * 40}%)`;
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const categories = ['all', ...Array.from(new Set(SHOP_ITEMS.map(i => i.category)))];
 
-  const filteredItems = activeCategory === 'all' 
-    ? SHOP_ITEMS 
+  const filteredItems = activeCategory === 'all'
+    ? SHOP_ITEMS
     : SHOP_ITEMS.filter(i => i.category === activeCategory);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <section className="bg-secondary pt-24 pb-20 text-center px-4 relative">
-        <div className="container relative z-10 max-w-4xl mx-auto">
-          <h1 className="font-serif text-5xl md:text-7xl font-black text-white mb-6">
+      {/* Hero: left-aligned grain surface, matching Local Guide's sun-theme
+          treatment instead of the flat teal band. */}
+      <section ref={heroRef} className="relative overflow-hidden pt-28 pb-16 px-4 md:pt-36 md:pb-20">
+        <img
+          ref={imgRef}
+          src={shopHeroImg}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full object-cover object-center will-change-transform"
+          style={{ height: '140%', top: '-20%' }}
+        />
+        {/* base dark scrim */}
+        <div className="absolute inset-0 bg-black/45" />
+        {/* warm amber highlight blooming up from the bottom edge */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-amber-900/60 via-amber-700/20 to-transparent" />
+        {/* soft vignette on the sides */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20" />
+        <div className="container relative z-10 mx-auto max-w-4xl">
+          <span className="eyebrow animate-in fade-in slide-in-from-bottom-2 duration-700 text-white/70">Take It Home</span>
+          <h1 className="type-display mt-4 text-white animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
             The Hut Shop
           </h1>
-          <p className="text-xl text-white/90 font-medium max-w-2xl mx-auto">
+          <p className="mt-6 max-w-[60ch] text-lg text-white/80 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
             Take a piece of the legend home with you. Official Bahi Hut and Golden Host merchandise.
           </p>
         </div>
       </section>
 
-      <section className="py-8 bg-card border-b border-border">
+      <section className="pt-8 pb-8">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-2 border-b border-border pb-8">
             {categories.map(cat => (
               <Button
                 key={cat}
-                variant={activeCategory === cat ? "default" : "outline"}
+                size="sm"
+                variant={activeCategory === cat ? "default" : "ghost"}
                 onClick={() => setActiveCategory(cat)}
                 className="capitalize"
               >
@@ -98,12 +135,12 @@ export default function Shop() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {filteredItems.map(item => (
-              <div key={item.id} className="group relative bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
-                
+              <div key={item.id} className="group relative bg-card rounded-2xl overflow-hidden ring-1 ring-border/60 transition-shadow duration-300 hover:shadow-xl flex flex-col">
+
                 {/* Image Area */}
                 <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center p-4">
                   {!item.inStock && (
@@ -114,11 +151,11 @@ export default function Shop() {
                   {item.sale && item.inStock && (
                     <Badge className="absolute right-4 top-4 z-10 shadow-sm">Sale</Badge>
                   )}
-                  
+
                   {item.image ? (
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
+                    <img
+                      src={item.image}
+                      alt={item.name}
                       className={`w-full h-full object-contain ${!item.inStock ? 'opacity-50' : 'group-hover:scale-105 transition-transform duration-500'}`}
                     />
                   ) : (
@@ -141,10 +178,10 @@ export default function Shop() {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="mt-auto">
-                    <Button 
-                      className="w-full" 
+                    <Button
+                      className="w-full"
                       variant={item.inStock ? "default" : "secondary"}
                       disabled={!item.inStock}
                       asChild={item.inStock}
@@ -162,17 +199,24 @@ export default function Shop() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="mt-16 text-center bg-accent/20 border border-accent/30 rounded-2xl p-8">
-            <h3 className="font-serif text-2xl font-bold mb-2">Looking for more?</h3>
-            <p className="text-muted-foreground mb-6">Our full inventory, including limited edition Tiki Fever merch, is available at the bar.</p>
-            <Button variant="outline" className="bg-background" asChild>
-              <a href="https://www.bahihut.com/shop" target="_blank" rel="noopener noreferrer">
-                Visit Official Store
-              </a>
-            </Button>
+      {/* CTA: grain teal band, matching the treatment used to close the
+          other pages instead of a flat accent-tinted box. */}
+      <section className="grain relative overflow-hidden bg-secondary px-4 py-16 text-secondary-foreground md:py-20">
+        <div className="container relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 text-center md:flex-row md:items-center md:justify-between md:text-left">
+          <div>
+            <h3 className="font-serif text-2xl font-bold md:text-3xl">Looking for more?</h3>
+            <p className="mt-3 max-w-md text-secondary-foreground/80">
+              Our full inventory, including limited edition Tiki Fever merch, is available at the bar.
+            </p>
           </div>
-
+          <Button size="lg" variant="glass" className="shrink-0" asChild>
+            <a href="https://www.bahihut.com/shop" target="_blank" rel="noopener noreferrer">
+              Visit Official Store
+            </a>
+          </Button>
         </div>
       </section>
     </div>

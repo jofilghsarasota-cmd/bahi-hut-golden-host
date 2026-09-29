@@ -1,12 +1,16 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Calendar, Clock, Users } from 'lucide-react';
-import ScrollScrubHero, { type LoungeBeat } from '@/components/scroll-scrub-hero';
+import AutoplayHero, { type LoungeBeat } from '@/components/autoplay-hero';
 import WalkInSequence from '@/components/walk-in-sequence';
 import EscapeDive from '@/components/escape-dive';
 import FlamingBowl from '@/components/flaming-bowl';
-import poolImg from '@assets/generated_images/resort-pool.jpg';
+import Reviews from '@/components/reviews';
+import tikiMug from '@assets/generated_images/icons/tiki_mug_icon2.png';
+import poolImg from '@assets/lost-at-sea-selects/guests-lifestyle.jpg';
+import eventsImg from '@assets/lost-at-sea-selects/band-vocalist.jpg';
+import privateEventsImg from '@assets/lost-at-sea-selects/interior-crowd.jpg';
 
 // Delay for a `.reveal*` element inside a hold (see index.css).
 const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
@@ -32,7 +36,7 @@ function getOpenStatus(now = new Date()) {
   if (hour < 2 && lateNight(yesterday)) {
     return { open: true, label: 'Open now until 2 AM' };
   }
-  return { open: false, label: 'Opens today at 1 PM' };
+  return { open: false, label: '12PM - 12AM' };
 }
 
 function OpenStatus() {
@@ -197,11 +201,99 @@ function EscapeHold() {
   );
 }
 
+// Autonomous waypoints the tiki mug drifts between when no cursor is present.
+const TIKI_WAYPOINTS = [
+  { xPct: 0.08, yPct: 0.15 },
+  { xPct: 0.75, yPct: 0.10 },
+  { xPct: 0.85, yPct: 0.65 },
+  { xPct: 0.45, yPct: 0.80 },
+  { xPct: 0.15, yPct: 0.55 },
+  { xPct: 0.55, yPct: 0.25 },
+];
+
 export default function Home() {
+  const tikiRef = useRef<HTMLImageElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const tikiPos = useRef({ x: 0, y: 0 });
+  const tikiCursor = useRef<{ x: number; y: number } | null>(null);
+  const tikiRaf = useRef<number | null>(null);
+  const waypointIdx = useRef(0);
+  const tikiScale = useRef(1);
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    const ease = 0.012;
+    const cursorEase = 0.035;
+    let wpProgress = 0;
+
+    const getWaypointTarget = () => {
+      const section = sectionRef.current;
+      if (!section) return { x: 200, y: 200 };
+      const w = section.offsetWidth;
+      const h = section.offsetHeight;
+      const wp = TIKI_WAYPOINTS[waypointIdx.current % TIKI_WAYPOINTS.length];
+      return { x: wp.xPct * w, y: wp.yPct * h };
+    };
+
+    if (!initialized.current) {
+      const t = getWaypointTarget();
+      tikiPos.current = { x: t.x, y: t.y };
+      initialized.current = true;
+    }
+
+    const tick = () => {
+      const el = tikiRef.current;
+      if (!el) { tikiRaf.current = requestAnimationFrame(tick); return; }
+
+      const cursor = tikiCursor.current;
+      let targetX: number, targetY: number, lerpRate: number;
+
+      if (cursor) {
+        targetX = cursor.x;
+        targetY = cursor.y;
+        lerpRate = cursorEase;
+      } else {
+        const wp = getWaypointTarget();
+        targetX = wp.x;
+        targetY = wp.y;
+        lerpRate = ease;
+      }
+
+      tikiPos.current.x += (targetX - tikiPos.current.x) * lerpRate;
+      tikiPos.current.y += (targetY - tikiPos.current.y) * lerpRate;
+
+      const dx = targetX - tikiPos.current.x;
+      const dy = targetY - tikiPos.current.y;
+      const rot = dx * 0.12;
+
+      const targetScale = cursor ? 1.6 : 1;
+      tikiScale.current += (targetScale - tikiScale.current) * 0.03;
+      const s = tikiScale.current;
+
+      el.style.transform = `translate(${tikiPos.current.x - 90}px, ${tikiPos.current.y - 90}px) rotate(${rot}deg) scale(${s})`;
+      el.style.opacity = '0.2';
+
+      if (!cursor && Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+        wpProgress++;
+        if (wpProgress > 60) {
+          waypointIdx.current = (waypointIdx.current + 1) % TIKI_WAYPOINTS.length;
+          wpProgress = 0;
+        }
+      } else {
+        wpProgress = 0;
+      }
+
+      tikiRaf.current = requestAnimationFrame(tick);
+    };
+
+    tikiRaf.current = requestAnimationFrame(tick);
+    return () => { if (tikiRaf.current) cancelAnimationFrame(tikiRaf.current); };
+  }, []);
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <ScrollScrubHero
+      <AutoplayHero
         endContent={
           <div className="relative flex flex-col items-center">
             <span
@@ -223,7 +315,7 @@ export default function Home() {
               <span aria-hidden="true" className="reveal-rule origin-left h-px w-10 md:w-16 bg-white/50" style={delay(700)} />
             </p>
 
-            <div className="reveal relative mt-12 w-full" style={delay(950)}>
+            <div className="reveal relative mt-12 md:mt-24 lg:mt-32 w-full" style={delay(950)}>
               <HeroActions />
             </div>
           </div>
@@ -247,11 +339,38 @@ export default function Home() {
             <HeroActions />
           </div>
         </div>
-      </ScrollScrubHero>
+      </AutoplayHero>
 
       {/* Intro / Vibe Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4">
+      <section
+        ref={sectionRef}
+        className="py-24 bg-background relative overflow-hidden"
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          tikiCursor.current = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          };
+        }}
+        onMouseLeave={() => { tikiCursor.current = null; }}
+      >
+        {/* Tiki mug — follows cursor or roams autonomously */}
+        <img
+          ref={tikiRef}
+          src={tikiMug}
+          alt=""
+          aria-hidden
+          className="absolute pointer-events-none select-none blur-[1.5px]"
+          style={{
+            top: 0,
+            left: 0,
+            width: 180,
+            height: 'auto',
+            opacity: 0.2,
+          }}
+        />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
             <div className="space-y-6">
               <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground">
@@ -278,6 +397,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Guest Reviews */}
+      <Reviews />
+
       {/* Cross-Promo Grid */}
       <section className="py-24 bg-card">
         <div className="container mx-auto px-4">
@@ -285,7 +407,7 @@ export default function Home() {
             {/* The Resort */}
             <div className="group relative rounded-3xl overflow-hidden bg-background shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full border border-border">
               <div className="aspect-video overflow-hidden">
-                <img src={poolImg} alt="Golden Host Pool" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={poolImg} alt="Guests enjoying the Golden Host Resort poolside" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <div className="p-8 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 text-primary mb-4">
@@ -304,8 +426,16 @@ export default function Home() {
 
             {/* Events */}
             <div className="group relative rounded-3xl overflow-hidden bg-background shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full border border-border">
-              <div className="aspect-video bg-secondary p-8 flex items-center justify-center text-secondary-foreground text-center">
-                <h4 className="font-serif text-3xl font-bold rotate-[-2deg] drop-shadow-md">Tiki Fever &<br/>Live Music</h4>
+              <div className="relative aspect-video overflow-hidden">
+                <img
+                  src={eventsImg}
+                  alt="A vocalist performing live under the Bahi Hut's thatched roof"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-secondary/60" />
+                <div className="absolute inset-0 flex items-center justify-center p-8 text-center text-secondary-foreground">
+                  <h4 className="font-serif text-3xl font-bold rotate-[-2deg] drop-shadow-md">Tiki Fever &<br/>Live Music</h4>
+                </div>
               </div>
               <div className="p-8 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 text-primary mb-4">
@@ -324,8 +454,18 @@ export default function Home() {
 
             {/* Private Events */}
             <div className="group relative rounded-3xl overflow-hidden bg-background shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full border border-border">
-              <div className="grain aspect-video bg-primary p-8 flex items-center justify-center text-primary-foreground text-center relative overflow-hidden">
-                <h4 className="font-serif text-4xl font-black italic relative z-10">20 to 350<br/>Guests</h4>
+              <div className="grain relative aspect-video overflow-hidden">
+                <img
+                  src={privateEventsImg}
+                  alt="A crowd filling the Bahi Hut's lounge during a private party"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute inset-0 flex items-center justify-center p-8">
+                  <div className="rounded-2xl bg-primary px-6 py-4 text-center text-primary-foreground shadow-lg">
+                    <h4 className="font-serif text-4xl font-black italic">20 to 350<br/>Guests</h4>
+                  </div>
+                </div>
               </div>
               <div className="p-8 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 text-primary mb-4">
