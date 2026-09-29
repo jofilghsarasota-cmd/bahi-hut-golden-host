@@ -1,5 +1,5 @@
-import { useRef, type CSSProperties } from 'react';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { type CSSProperties } from 'react';
+import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import tikiMotif from '@assets/bg.avif';
 
@@ -107,17 +107,6 @@ function ReviewCard({ review, featured = false }: { review: Review; featured?: b
 }
 
 export default function Reviews() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (dir: 'left' | 'right') => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const card = el.querySelector<HTMLElement>('[data-review]');
-    const step = card ? card.offsetWidth + 16 : 320;
-    el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
-  };
-
-  const [featured, ...rest] = REVIEWS;
 
   return (
     <section className="grain motif relative overflow-hidden bg-secondary px-4 py-24 text-secondary-foreground" style={motifStyle}>
@@ -137,51 +126,17 @@ export default function Reviews() {
           </div>
         </div>
 
-        {/* Desktop grid: featured card spans 2 cols in row 1, rest fill evenly */}
-        <div className="hidden lg:grid lg:grid-cols-3 gap-5">
-          <div className="col-span-2">
-            <ReviewCard review={featured} featured />
-          </div>
-          <ReviewCard review={rest[0]} />
-          <ReviewCard review={rest[1]} />
-          <ReviewCard review={rest[2]} />
-          <ReviewCard review={rest[3]} />
-        </div>
-
-        {/* Horizontal scroll on mobile / tablet */}
-        <div className="lg:hidden relative">
-          <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 -mx-4 px-4"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {REVIEWS.map((review, i) => (
+        {/* Infinite marquee — duplicated cards for seamless loop */}
+        <div className="overflow-hidden -mx-4">
+          <div className="marquee-track gap-5 px-4" style={{ '--marquee-duration': '50s' } as CSSProperties}>
+            {[...REVIEWS, ...REVIEWS].map((review, i) => (
               <div
-                key={review.author}
-                data-review
-                className="snap-start shrink-0 w-[85vw] sm:w-[340px]"
+                key={`${review.author}-${i}`}
+                className="shrink-0 w-[85vw] sm:w-[340px] lg:w-[380px]"
               >
-                <ReviewCard review={review} featured={i === 0} />
+                <ReviewCard review={review} featured={i % REVIEWS.length === 0} />
               </div>
             ))}
-          </div>
-
-          {/* Scroll arrows */}
-          <div className="flex items-center justify-center gap-3 mt-6">
-            <button
-              onClick={() => scroll('left')}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors border border-white/15"
-              aria-label="Previous review"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors border border-white/15"
-              aria-label="Next review"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
