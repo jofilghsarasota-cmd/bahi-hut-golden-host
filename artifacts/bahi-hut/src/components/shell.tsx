@@ -5,6 +5,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { ScrollProgressIcon } from '@/components/scroll-progress-icon';
 import { CookieConsent } from '@/components/cookie-consent';
 import { Button } from '@/components/ui/button';
+import { BookARoomButton } from '@/components/book-a-room-button';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -64,11 +65,13 @@ function MobileStickyCtA() {
 
   return (
     <div className="mobile-cta-enter fixed bottom-4 inset-x-4 z-40 flex gap-2 lg:hidden">
-      <Button size="lg" className="flex-1 shadow-lg shadow-primary/30" asChild>
-        <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
-          Book a Room
-        </a>
-      </Button>
+      <BookARoomButton
+        href={BOOKING_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        size="lg"
+        className="flex-1 shadow-lg shadow-primary/30"
+      />
       <Button size="lg" variant="glass" className="shadow-lg" asChild>
         <a href="tel:9413555141">
           <Phone className="w-4 h-4" />
@@ -178,11 +181,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <Button asChild>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
-                Book a Room
-              </a>
-            </Button>
+            <BookARoomButton href={BOOKING_URL} target="_blank" rel="noopener noreferrer" />
           </div>
 
           {/* Mobile Nav: Radix Dialog gives focus trap, Esc and scroll lock. */}
@@ -222,11 +221,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </nav>
               <div className="grid gap-3 border-t border-border p-6">
                 <SheetClose asChild>
-                  <Button asChild size="lg" className="w-full">
-                    <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
-                      Book a Room
-                    </a>
-                  </Button>
+                  <BookARoomButton
+                    href={BOOKING_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    size="lg"
+                    className="w-full"
+                  />
                 </SheetClose>
                 <SheetClose asChild>
                   <Button asChild size="lg" variant="outline" className="w-full">

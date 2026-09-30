@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { BookARoomButton } from '@/components/book-a-room-button';
 import { ArrowRight, MapPin, Calendar, Clock, Users, GlassWater, Sparkles, PartyPopper } from 'lucide-react';
 import { useTilt } from '@/hooks/use-tilt';
 import AutoplayHero, { type LoungeBeat } from '@/components/autoplay-hero';
@@ -69,11 +70,13 @@ function HeroActions() {
       <Button size="lg" className="w-full sm:w-auto" asChild>
         <Link href="/bahi-hut">Explore The Bar</Link>
       </Button>
-      <Button size="lg" variant="glass" className="w-full sm:w-auto" asChild>
-        <a href="https://booking.hotelkeyapp.com/v2/index.html#/booking/search?pc=1055&property_id=dcb4a0ce-88b0-45b0-a4c8-e01bb6a6ad07&url=https%3A%2F%2Fwww.bahihut.com%2Fghresort" target="_blank" rel="noopener noreferrer">
-          Book a Room
-        </a>
-      </Button>
+      <BookARoomButton
+        href="https://booking.hotelkeyapp.com/v2/index.html#/booking/search?pc=1055&property_id=dcb4a0ce-88b0-45b0-a4c8-e01bb6a6ad07&url=https%3A%2F%2Fwww.bahihut.com%2Fghresort"
+        target="_blank"
+        rel="noopener noreferrer"
+        size="lg"
+        className="w-full sm:w-auto"
+      />
     </div>
   );
 }
