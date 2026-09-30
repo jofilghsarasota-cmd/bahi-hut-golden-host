@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Reveal } from '@/components/reveal';
-import { BedDouble, Wifi, Waves, CheckCircle2 } from 'lucide-react';
-import heroImg from '@assets/generated_images/_MRZ1902.JPG';
+import { BedDouble, Wifi, Waves, CheckCircle2, Car } from 'lucide-react';
+import heroImg from '@assets/generated_images/_MRZ1902.jpg';
 import poolImg from '@assets/lost-at-sea-selects/pool-tiki-totem.jpg';
 
 const AMENITIES = [
@@ -10,6 +10,7 @@ const AMENITIES = [
   { icon: Wifi, title: 'Free Wi-Fi', description: 'Stay connected throughout the property.' },
   { icon: CheckCircle2, title: 'Check-In: 3PM - 10PM', description: 'Early check-in based on availability.' },
   { icon: CheckCircle2, title: 'Check-Out: 11AM', description: 'Late check-out upon request.' },
+  { icon: Car, title: 'Ample Parking', description: 'Free on-site parking for all guests.' },
 ];
 
 export default function Resort() {
@@ -108,7 +109,7 @@ export default function Resort() {
           <Reveal>
             <span className="eyebrow">At the Property</span>
           </Reveal>
-          <div className="mt-8 grid sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 divide-border">
+          <div className="mt-8 grid sm:grid-cols-2 md:grid-cols-5 divide-y sm:divide-y-0 divide-border">
             {AMENITIES.map((item, i) => (
               <Reveal
                 key={item.title}

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin, Calendar, Clock, Users } from 'lucide-react';
+import { ArrowRight, MapPin, Calendar, Clock, Users, GlassWater, Sparkles, PartyPopper } from 'lucide-react';
+import { useTilt } from '@/hooks/use-tilt';
 import AutoplayHero, { type LoungeBeat } from '@/components/autoplay-hero';
 import WalkInSequence from '@/components/walk-in-sequence';
 import EscapeDive from '@/components/escape-dive';
@@ -11,6 +12,8 @@ import tikiMug from '@assets/generated_images/icons/tiki_mug_icon2.png';
 import poolImg from '@assets/lost-at-sea-selects/guests-lifestyle.jpg';
 import eventsImg from '@assets/lost-at-sea-selects/band-vocalist.jpg';
 import privateEventsImg from '@assets/lost-at-sea-selects/interior-crowd.jpg';
+import menuImg from '@assets/menu.avif';
+import menu2Img from '@assets/menu2.avif';
 
 // Delay for a `.reveal*` element inside a hold (see index.css).
 const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
@@ -36,7 +39,7 @@ function getOpenStatus(now = new Date()) {
   if (hour < 2 && lateNight(yesterday)) {
     return { open: true, label: 'Open now until 2 AM' };
   }
-  return { open: false, label: '12PM - 12AM' };
+  return { open: false, label: '1PM - 12AM' };
 }
 
 function OpenStatus() {
@@ -158,6 +161,26 @@ function BarHold() {
   );
 }
 
+function TiltMenuCard({ img, onZoom }: { img: { src: string; alt: string }; onZoom: (v: { src: string; alt: string }) => void }) {
+  const { ref, onMouseMove, onMouseLeave, style } = useTilt();
+  return (
+    <button
+      ref={ref as React.RefObject<HTMLButtonElement>}
+      onClick={() => onZoom(img)}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      style={style}
+      className="group relative rounded-3xl overflow-hidden shadow-2xl border border-border/50 cursor-zoom-in text-left"
+    >
+      <img
+        src={img.src}
+        alt={img.alt}
+        className="w-full h-full object-cover"
+      />
+    </button>
+  );
+}
+
 // Text revealed as the camera drops from the neighborhood to the door.
 const ESCAPE_BEATS: LoungeBeat[] = [
   {
@@ -220,6 +243,7 @@ export default function Home() {
   const waypointIdx = useRef(0);
   const tikiScale = useRef(1);
   const initialized = useRef(false);
+  const [zoomedImg, setZoomedImg] = useState<{ src: string; alt: string } | null>(null);
 
   useEffect(() => {
     const ease = 0.012;
@@ -354,6 +378,17 @@ export default function Home() {
         }}
         onMouseLeave={() => { tikiCursor.current = null; }}
       >
+        {/* Ambient tropical leaf parallax */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='none'><path d='M60 10c-8 20-30 35-50 40 25 0 42 15 50 35 8-20 25-35 50-35-20-5-42-20-50-40z' fill='currentColor' opacity='0.5'/></svg>")`,
+            backgroundSize: '120px 120px',
+            backgroundAttachment: 'fixed',
+          }}
+        />
+
         {/* Tiki mug — follows cursor or roams autonomously */}
         <img
           ref={tikiRef}
@@ -406,8 +441,11 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* The Resort */}
             <div className="group relative rounded-3xl overflow-hidden bg-background shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full border border-border">
-              <div className="aspect-video overflow-hidden">
+              <div className="relative aspect-video overflow-hidden">
                 <img src={poolImg} alt="Guests enjoying the Golden Host Resort poolside" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-koa/90 via-koa/70 to-transparent p-4 pt-8">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-white"><Sparkles className="w-4 h-4 text-primary" /> 50-foot heated saltwater pool</p>
+                </div>
               </div>
               <div className="p-8 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 text-primary mb-4">
@@ -435,6 +473,9 @@ export default function Home() {
                 <div className="absolute inset-0 bg-secondary/60" />
                 <div className="absolute inset-0 flex items-center justify-center p-8 text-center text-secondary-foreground">
                   <h4 className="font-serif text-3xl font-bold rotate-[-2deg] drop-shadow-md">Tiki Fever &<br/>Live Music</h4>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-koa/90 via-koa/70 to-transparent p-4 pt-8">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-white"><GlassWater className="w-4 h-4 text-primary" /> Drag Queen Bingo every Sunday</p>
                 </div>
               </div>
               <div className="p-8 flex-1 flex flex-col">
@@ -466,6 +507,9 @@ export default function Home() {
                     <h4 className="font-serif text-4xl font-black italic">20 to 350<br/>Guests</h4>
                   </div>
                 </div>
+                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-gradient-to-t from-koa/90 via-koa/70 to-transparent p-4 pt-8">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-white"><PartyPopper className="w-4 h-4 text-primary" /> Weddings, birthdays & pool deck parties</p>
+                </div>
               </div>
               <div className="p-8 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 text-primary mb-4">
@@ -481,6 +525,55 @@ export default function Home() {
                 </Button>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Menu Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <p className="font-bold tracking-widest uppercase text-sm text-primary mb-3">What We Pour</p>
+              <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground">
+                The Menu
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                Classic tiki drinks and island bites. Our legendary Mai Tai is two-per-person for a reason.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 lg:gap-10">
+              {[{ src: menuImg, alt: 'Bahi Hut drink menu' }, { src: menu2Img, alt: 'Bahi Hut food menu' }].map((img) => (
+                <TiltMenuCard key={img.alt} img={img} onZoom={setZoomedImg} />
+              ))}
+            </div>
+
+            {/* Lightbox */}
+            {zoomedImg && (
+              <div
+                role="dialog"
+                aria-label="Menu image preview"
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+                onClick={() => setZoomedImg(null)}
+                onKeyDown={(e) => { if (e.key === 'Escape') setZoomedImg(null); }}
+              >
+                <img
+                  src={zoomedImg.src}
+                  alt={zoomedImg.alt}
+                  className="max-w-[95vw] max-h-[95vh] object-contain rounded-xl shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <button
+                  className="absolute top-4 right-4 text-white/80 hover:text-white text-4xl leading-none"
+                  onClick={() => setZoomedImg(null)}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       </section>

@@ -972,6 +972,52 @@ section > .escape-tint {
   100% { transform: translate(0, 0)            rotate(0deg); }
 }
 
+/* ---------------------------------------------------------------------------
+   Reviews marquee (components/reviews.tsx)
+   Infinite horizontal scroll, pauses on hover. Duplicated set for seamless loop.
+   ------------------------------------------------------------------------ */
+@keyframes marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-duration, 60s) linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ---------------------------------------------------------------------------
+   Page transitions (App.tsx)
+   Amber flash between routes via the View Transitions API.
+   ------------------------------------------------------------------------ */
+::view-transition-old(root) {
+  animation: vt-fade-out 0.2s ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 0.3s ease-out 0.15s both;
+}
+@keyframes vt-fade-out {
+  to { opacity: 0; filter: saturate(1.2) brightness(1.15); }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; filter: saturate(1.2) brightness(1.15); }
+  to { opacity: 1; filter: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile sticky CTA (components/shell.tsx)
+   ------------------------------------------------------------------------ */
+.mobile-cta-enter {
+  animation: mobile-cta-slide-up 0.4s var(--ease-out-soft) both;
+}
+@keyframes mobile-cta-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .coaster-spin,
   .story-grain,
@@ -986,5 +1032,15 @@ section > .escape-tint {
     scale: 1;
     filter: none;
     transition: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+  .mobile-cta-enter {
+    animation: none;
   }
 }
