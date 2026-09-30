@@ -1,7 +1,7 @@
 import { type CSSProperties } from 'react';
-import { Star, Flame, ArrowRight } from 'lucide-react';
+import { Star, Flame, ArrowRight, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import tikiMotif from '@assets/bg.avif';
+import tikiMotif from '@assets/cliparts/tiki.png';
 
 const motifStyle = { '--motif-image': `url(${tikiMotif})` } as CSSProperties;
 
@@ -70,10 +70,10 @@ function Avatar({ name, featured = false }: { name: string; featured?: boolean }
   const initial = name.charAt(0).toUpperCase();
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full font-serif font-bold shrink-0 border ${
+      className={`inline-flex items-center justify-center rounded-full font-serif font-bold shrink-0 border transition-transform duration-300 ${
         featured
-          ? 'w-11 h-11 text-base border-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.18)]'
-          : 'w-10 h-10 text-sm border-primary/50'
+          ? 'w-14 h-14 text-lg border-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.18)]'
+          : 'w-11 h-11 text-sm border-primary/50 group-hover:scale-105'
       }`}
       style={{
         background: featured
@@ -92,8 +92,8 @@ function ReviewCard({ review, featured = false }: { review: Review; featured?: b
     <div
       className={`group relative flex h-full flex-col rounded-2xl border transition-all duration-300 ${
         featured
-          ? 'border-white/10 bg-gradient-to-br from-koa/85 to-secondary/85 p-8'
-          : 'border-white/15 bg-white/8 p-6 backdrop-blur-sm hover:border-white/30 hover:bg-white/12'
+          ? 'border-white/10 bg-gradient-to-br from-koa/85 to-secondary/85 p-8 md:p-10'
+          : 'border-white/[0.08] bg-white/[0.04] p-6 backdrop-blur-sm hover:border-white/20 hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_hsl(20_60%_5%/0.5)]'
       }`}
     >
       {featured && (
@@ -104,24 +104,37 @@ function ReviewCard({ review, featured = false }: { review: Review; featured?: b
         />
       )}
 
-      <div className="flex items-center justify-between mb-4">
+      {/* Decorative quote mark */}
+      <Quote
+        className={`mb-4 ${
+          featured
+            ? 'w-10 h-10 text-primary/30'
+            : 'w-7 h-7 text-primary/15 group-hover:text-primary/25 transition-colors duration-300'
+        }`}
+        strokeWidth={1.5}
+        aria-hidden="true"
+      />
+
+      <div className="flex items-center justify-between mb-5">
         <Stars size={featured ? 'lg' : 'sm'} />
-        <GoogleG className={`w-5 h-5 transition-opacity ${featured ? 'text-primary/70' : 'text-secondary-foreground/35 group-hover:text-secondary-foreground/60'}`} />
+        <GoogleG className={`w-5 h-5 transition-opacity duration-300 ${featured ? 'text-primary/70' : 'text-secondary-foreground/25 group-hover:text-secondary-foreground/50'}`} />
       </div>
 
       <p
-        className={`flex-1 leading-relaxed text-secondary-foreground/90 ${
-          featured ? 'text-lg md:text-xl font-serif italic' : 'text-sm'
+        className={`flex-1 leading-relaxed text-secondary-foreground/85 ${
+          featured ? 'text-xl md:text-2xl font-serif italic leading-[1.5]' : 'text-[0.9375rem] leading-[1.7]'
         }`}
       >
-        &ldquo;{review.quote}&rdquo;
+        {review.quote}
       </p>
 
-      <div className={`relative z-10 mt-6 flex items-center gap-3 pt-4 border-t ${featured ? 'border-primary/20' : 'border-white/10'}`}>
+      <div className={`relative z-10 mt-6 flex items-center gap-3.5 pt-5 border-t ${featured ? 'border-primary/20' : 'border-white/[0.06]'}`}>
         <Avatar name={review.author} featured={featured} />
-        <div className="flex flex-col">
-          <span className="font-bold text-sm text-secondary-foreground">{review.author}</span>
-          <span className="text-xs text-secondary-foreground/50">{review.timeAgo}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className={`font-bold text-secondary-foreground ${featured ? 'text-base' : 'text-sm'}`}>
+            {review.author}
+          </span>
+          <span className="text-xs text-secondary-foreground/40">{review.timeAgo}</span>
         </div>
       </div>
     </div>
@@ -130,19 +143,21 @@ function ReviewCard({ review, featured = false }: { review: Review; featured?: b
   if (!featured) return body;
 
   return (
-    <div className="h-full rounded-[20px] p-[3px] bg-gradient-to-br from-primary/70 via-bamboo/25 to-primary/15 shadow-[0_18px_44px_-18px_hsl(20_60%_5%/0.55)]">
+    <div className="h-full rounded-[20px] p-[3px] bg-gradient-to-br from-primary/70 via-bamboo/25 to-primary/15 shadow-[0_24px_60px_-20px_hsl(20_60%_5%/0.6)]">
       {body}
     </div>
   );
 }
 
 export default function Reviews() {
+  const featured = REVIEWS.find((r) => r.featured)!;
+  const rest = REVIEWS.filter((r) => !r.featured);
 
   return (
-    <section className="grain motif relative overflow-hidden bg-secondary px-4 py-24 text-secondary-foreground" style={motifStyle}>
+    <section className="grain motif relative overflow-hidden bg-secondary px-4 py-24 md:py-32 text-secondary-foreground" style={motifStyle}>
       <div className="container relative z-10 mx-auto max-w-6xl">
         {/* Header */}
-        <div className="flex flex-col items-center text-center mb-16">
+        <div className="flex flex-col items-center text-center mb-16 md:mb-20">
           <span className="eyebrow text-secondary-foreground/70">Loved Since 1954</span>
           <h2 className="font-serif mt-4 text-4xl md:text-5xl font-bold">What Sarasota&rsquo;s Saying</h2>
 
@@ -156,7 +171,7 @@ export default function Reviews() {
             <div className="flex items-center gap-2 pr-4 border-r border-secondary-foreground/15">
               <Stars size="lg" />
               <span className="font-serif font-bold text-lg">4.6</span>
-              <span className="text-secondary-foreground/55 text-xs">· 1,295 reviews</span>
+              <span className="text-secondary-foreground/55 text-xs">&middot; 1,295 reviews</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-semibold text-secondary-foreground/75">
               <GoogleG className="w-3.5 h-3.5 text-primary" />
@@ -165,22 +180,23 @@ export default function Reviews() {
           </div>
         </div>
 
-        {/* Infinite marquee — duplicated cards for seamless loop */}
-        <div className="overflow-hidden -mx-4 -mt-4 pt-4">
-          <div className="marquee-track gap-5 px-4" style={{ '--marquee-duration': '50s' } as CSSProperties}>
-            {[...REVIEWS, ...REVIEWS].map((review, i) => (
-              <div
-                key={`${review.author}-${i}`}
-                className="shrink-0 w-[85vw] sm:w-[340px] lg:w-[380px]"
-              >
-                <ReviewCard review={review} featured={review.featured} />
-              </div>
-            ))}
+        {/* Review grid: featured card spans left column on desktop */}
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr]">
+          {/* Featured — spans 1 col on mobile, 1 col on md, 2 rows on lg */}
+          <div className="lg:row-span-2">
+            <ReviewCard review={featured} featured />
           </div>
+
+          {/* Remaining cards fill the grid */}
+          {rest.map((review) => (
+            <div key={review.author}>
+              <ReviewCard review={review} />
+            </div>
+          ))}
         </div>
 
         {/* CTA */}
-        <div className="mt-12 flex justify-center">
+        <div className="mt-14 md:mt-16 flex justify-center">
           <Button size="lg" variant="default" asChild>
             <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer">
               Read More on Google

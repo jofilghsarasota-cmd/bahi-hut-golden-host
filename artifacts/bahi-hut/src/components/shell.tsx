@@ -181,7 +181,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <BookARoomButton href={BOOKING_URL} target="_blank" rel="noopener noreferrer" />
+            <Button asChild className="font-bold tracking-wide rounded-full px-6">
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                Book a Room
+              </a>
+            </Button>
           </div>
 
           {/* Mobile Nav: Radix Dialog gives focus trap, Esc and scroll lock. */}
@@ -221,13 +225,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </nav>
               <div className="grid gap-3 border-t border-border p-6">
                 <SheetClose asChild>
-                  <BookARoomButton
-                    href={BOOKING_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    size="lg"
-                    className="w-full"
-                  />
+                  <Button asChild size="lg" className="w-full font-bold tracking-wide rounded-full">
+                    <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                      Book a Room
+                    </a>
+                  </Button>
                 </SheetClose>
                 <SheetClose asChild>
                   <Button asChild size="lg" variant="outline" className="w-full">
