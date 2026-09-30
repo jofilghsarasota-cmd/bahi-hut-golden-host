@@ -99,7 +99,7 @@ function ReviewCard({ review, featured = false }: { review: Review; featured?: b
       {featured && (
         <Flame
           className="absolute -top-3.5 right-6 h-7 w-7 text-primary drop-shadow-[0_2px_6px_hsl(var(--primary)/0.5)]"
-          fill="currentColor"
+          strokeWidth={2.25}
           aria-hidden="true"
         />
       )}
@@ -166,7 +166,7 @@ export default function Reviews() {
         </div>
 
         {/* Infinite marquee — duplicated cards for seamless loop */}
-        <div className="overflow-hidden -mx-4">
+        <div className="overflow-hidden -mx-4 -mt-4 pt-4">
           <div className="marquee-track gap-5 px-4" style={{ '--marquee-duration': '50s' } as CSSProperties}>
             {[...REVIEWS, ...REVIEWS].map((review, i) => (
               <div
