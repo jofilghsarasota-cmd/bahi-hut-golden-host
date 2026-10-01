@@ -1,21 +1,22 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import entranceImg from '@assets/generated_images/res/12.jpg';
 import signImg from '@assets/generated_images/res/8.avif';
 import totemImg from '@assets/generated_images/res/2.avif';
 import alohaImg from '@assets/generated_images/res/3.avif';
 
-// A pinned, scroll-driven walk from the street to the door, in real photos:
+// A walk from the street to the door, in real photos, browsed as a carousel:
 //
 //   blue-lit entrance  ->  the sign  ->  the totem  ->  the Aloha mask
 //
-// Each photo pushes in slowly while it's on screen and the next one fades in
-// over it, so the sequence reads as one camera walking forward. Captions use
-// the same masked-line reveal as the lounge beats in the hero.
+// The active photo gets a slow Ken Burns push-in while it's shown and
+// crossfades into the next on navigation. Captions use the same
+// masked-line reveal as the lounge beats in the hero.
 //
 // On top of the photos: the real bulbs in each shot twinkle, light sources
 // breathe or buzz like neon, soft bokeh drifts past at different depths (its
-// color follows the walk from blue to warm to red), a light leak sweeps across
-// each cut, and the camera sways a little with every step.
+// color follows the walk from blue to warm to red), and the camera sways a
+// little while a slide is active.
 
 // A point of light sitting on a real bulb, in % of the photo.
 type Glint = [x: number, y: number];
@@ -46,7 +47,7 @@ export interface WalkInFrame {
   body?: string;
   // Photo aspect ratio, so light effects stay pinned to the right spots.
   aspect: number;
-  // Hue the ambient light shifts toward while this photo is up.
+  // Ambient hue while this photo is active.
   hue: number;
   // Makes the last caption line glow in this color.
   glow?: string;
@@ -145,23 +146,6 @@ const FRAMES: WalkInFrame[] = [
   },
 ];
 
-// Scroll distance per photo, in viewport heights.
-const FRAME_VH = 90;
-const TOTAL_SCROLL_VH = FRAME_VH * FRAMES.length;
-// The wrapper also contains the pinned viewport itself (100vh).
-const WRAPPER_VH = TOTAL_SCROLL_VH + 100;
-
-// Same feel as the hero: the scene trails the scroll a little.
-const SMOOTHING = 0.12;
-const SETTLE_THRESHOLD = 0.0005;
-
-const clamp01 = (x: number) => Math.min(Math.max(x, 0), 1);
-
-const smoothstep = (from: number, to: number, x: number) => {
-  const t = clamp01((x - from) / (to - from));
-  return t * t * (3 - 2 * t);
-};
-
 // Deterministic pseudo-random, so the lights look the same on every render.
 const rand = (n: number) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -182,12 +166,21 @@ const BOKEH = Array.from({ length: 18 }, (_, i) => {
   };
 });
 
+// How long an untouched slide stays up before the carousel advances.
+const AUTOPLAY_MS = 6000;
+// A swipe past this fraction of the stage width changes slides.
+const SWIPE_THRESHOLD = 0.12;
+
 export default function WalkInSequence() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const captionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [inView, setInView] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [drag, setDrag] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragInfo = useRef<{ id: number; startX: number; width: number } | null>(null);
+  const last = FRAMES.length - 1;
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -197,170 +190,62 @@ export default function WalkInSequence() {
     return () => query.removeEventListener('change', handleChange);
   }, []);
 
+  const goTo = useCallback(
+    (next: number) => setIndex(((next % FRAMES.length) + FRAMES.length) % FRAMES.length),
+    [],
+  );
+  const goPrev = useCallback(() => goTo(index - 1), [goTo, index]);
+  const goNext = useCallback(() => goTo(index + 1), [goTo, index]);
+
+  // Pause every looping light, and autoplay, while the carousel is off screen.
   useEffect(() => {
-    if (reducedMotion) return;
-
-    const wrapper = wrapperRef.current;
     const stage = stageRef.current;
-    if (!wrapper || !stage) return;
-
-    let eased = 0;
-    // Pointer position, -1..1 on each axis, and the camera's eased copy of it.
-    const pointer = { x: 0, y: 0 };
-    const pointerEased = { x: 0, y: 0 };
-    let rafId = 0;
-    let isAnimating = false;
-    let lastTimestamp = 0;
-    const last = FRAMES.length - 1;
-    // Last values written to CSS custom properties, to skip no-op writes.
-    const written = new Map<string, string>();
-
-    const setVar = (el: HTMLElement, key: string, name: string, value: number) => {
-      const str = value.toFixed(4);
-      if (written.get(key + name) !== str) {
-        written.set(key + name, str);
-        el.style.setProperty(name, str);
-      }
-    };
-
-    // Progress through the sequence, 0 -> FRAMES.length.
-    const getTarget = () => {
-      const rect = wrapper.getBoundingClientRect();
-      const pxPerVh = rect.height / WRAPPER_VH;
-      if (pxPerVh <= 0) return 0;
-      const vh = Math.min(Math.max(-rect.top / pxPerVh, 0), TOTAL_SCROLL_VH);
-      return vh / FRAME_VH;
-    };
-
-    const render = (f: number) => {
-      photoRefs.current.forEach((el, i) => {
-        if (!el) return;
-        // Each photo fades in over the previous one as its turn begins...
-        const shown = i === 0 ? 1 : smoothstep(i - 0.3, i + 0.05, f);
-        // ...and keeps pushing in until the next one has fully covered it.
-        const push = clamp01((f - i + 0.3) / 1.4);
-        setVar(el, `p${i}`, '--shown', shown);
-        setVar(el, `p${i}`, '--push', push);
-        // Only the photos on screen keep their lights animating.
-        const on = String(shown > 0.01 && (i === last || f < i + 1.05));
-        if (el.dataset.on !== on) el.dataset.on = on;
-      });
-
-      captionRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const enter = smoothstep(i + 0.02, i + 0.32, f);
-        const exit = i === last ? 0 : smoothstep(i + 0.62, i + 0.88, f);
-        const local = clamp01((f - i) / 0.9);
-        setVar(el, `c${i}`, '--enter', enter);
-        setVar(el, `c${i}`, '--exit', exit);
-        setVar(el, `c${i}`, '--local', local);
-      });
-
-      const current = Math.min(Math.floor(f + 0.1), last);
-      stage.dataset.frame = String(current);
-      setVar(stage, 's', '--walk', f / FRAMES.length);
-
-      // The ambient hue follows the crossfades from photo to photo, and a
-      // light leak flares across each cut, gone again once it lands.
-      let hue = FRAMES[0].hue;
-      let leak = 0;
-      let leakX = 0;
-      for (let i = 1; i <= last; i++) {
-        hue += smoothstep(i - 0.3, i + 0.05, f) * (FRAMES[i].hue - FRAMES[i - 1].hue);
-        const t = clamp01((f - (i - 0.42)) / 0.6);
-        if (t > 0 && t < 1) {
-          leak = Math.sin(Math.PI * t);
-          leakX = t;
-        }
-      }
-      setVar(stage, 's', '--glow-h', hue);
-      setVar(stage, 's', '--leak', leak);
-      setVar(stage, 's', '--leak-x', leakX);
-
-      // Two footsteps per photo: a small dip and a sway side to side.
-      const step = f * Math.PI * 2;
-      setVar(stage, 's', '--bob', -Math.abs(Math.sin(step)));
-      setVar(stage, 's', '--sway', Math.sin(step));
-      setVar(stage, 's', '--mx', pointerEased.x);
-      setVar(stage, 's', '--my', pointerEased.y);
-    };
-
-    const tick = (timestamp: number) => {
-      // Frame-rate independent easing, so 120Hz and 60Hz screens feel the same.
-      const elapsed = lastTimestamp ? Math.min(timestamp - lastTimestamp, 100) : 16.67;
-      lastTimestamp = timestamp;
-      const factor = 1 - Math.pow(1 - SMOOTHING, elapsed / 16.67);
-
-      const target = getTarget();
-      const delta = target - eased;
-      eased = Math.abs(delta) < SETTLE_THRESHOLD ? target : eased + delta * factor;
-
-      // The camera follows the pointer more lazily than the scroll.
-      let pointerSettled = true;
-      for (const axis of ['x', 'y'] as const) {
-        const d = pointer[axis] - pointerEased[axis];
-        if (Math.abs(d) < 0.001) {
-          pointerEased[axis] = pointer[axis];
-        } else {
-          pointerEased[axis] += d * factor * 0.5;
-          pointerSettled = false;
-        }
-      }
-
-      render(eased);
-
-      if (eased !== target || !pointerSettled) {
-        rafId = window.requestAnimationFrame(tick);
-      } else {
-        isAnimating = false;
-        lastTimestamp = 0;
-      }
-    };
-
-    const ensureAnimating = () => {
-      if (!isAnimating) {
-        isAnimating = true;
-        rafId = window.requestAnimationFrame(tick);
-      }
-    };
-
-    const handlePointer = (e: PointerEvent) => {
-      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
-      ensureAnimating();
-    };
-    const resetPointer = () => {
-      pointer.x = 0;
-      pointer.y = 0;
-      ensureAnimating();
-    };
-    // Touch screens get the scroll effects only.
-    const finePointer = window.matchMedia('(pointer: fine)').matches;
-
-    // Pause every looping light while the section is off screen.
-    const observer = new IntersectionObserver(([entry]) => {
-      stage.dataset.inview = String(entry.isIntersecting);
-    });
+    if (!stage) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
     observer.observe(stage);
+    return () => observer.disconnect();
+  }, []);
 
-    eased = getTarget();
-    render(eased);
+  useEffect(() => {
+    if (reducedMotion || !inView || paused) return;
+    const id = window.setTimeout(() => goNext(), AUTOPLAY_MS);
+    return () => window.clearTimeout(id);
+  }, [reducedMotion, inView, paused, index, goNext]);
 
-    window.addEventListener('scroll', ensureAnimating, { passive: true });
-    window.addEventListener('resize', ensureAnimating, { passive: true });
-    if (finePointer) {
-      stage.addEventListener('pointermove', handlePointer, { passive: true });
-      stage.addEventListener('pointerleave', resetPointer);
-    }
-    return () => {
-      window.removeEventListener('scroll', ensureAnimating);
-      window.removeEventListener('resize', ensureAnimating);
-      stage.removeEventListener('pointermove', handlePointer);
-      stage.removeEventListener('pointerleave', resetPointer);
-      observer.disconnect();
-      if (rafId) window.cancelAnimationFrame(rafId);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') goPrev();
+      else if (e.key === 'ArrowRight') goNext();
     };
-  }, [reducedMotion]);
+    stage.addEventListener('keydown', onKey);
+    return () => stage.removeEventListener('keydown', onKey);
+  }, [goPrev, goNext]);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const width = stageRef.current?.getBoundingClientRect().width ?? 1;
+    dragInfo.current = { id: e.pointerId, startX: e.clientX, width };
+    setPaused(true);
+    setIsDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const info = dragInfo.current;
+    if (!info || info.id !== e.pointerId) return;
+    setDrag((e.clientX - info.startX) / info.width);
+  };
+  const endDrag = (e: React.PointerEvent) => {
+    const info = dragInfo.current;
+    if (!info || info.id !== e.pointerId) return;
+    dragInfo.current = null;
+    if (drag > SWIPE_THRESHOLD) goPrev();
+    else if (drag < -SWIPE_THRESHOLD) goNext();
+    setDrag(0);
+    setIsDragging(false);
+    setPaused(false);
+  };
 
   if (reducedMotion) {
     // Static fallback: the four photos with their captions.
@@ -381,117 +266,146 @@ export default function WalkInSequence() {
     );
   }
 
+  const dragPct = drag * 100;
+
   return (
-    <div ref={wrapperRef} className="relative" style={{ height: `${WRAPPER_VH}vh` }}>
-      <div
-        ref={stageRef}
-        data-frame="0"
-        data-inview="true"
-        className="walk scroll-scrub-viewport sticky top-0 w-full overflow-hidden bg-[hsl(20_40%_6%)]"
-      >
-        <div className="walk-camera absolute inset-0">
-          {FRAMES.map((frame, i) => {
-            const [fx, fy] = frame.focus.split(' ');
-            return (
+    <div
+      ref={stageRef}
+      data-inview={inView}
+      data-dragging={isDragging}
+      tabIndex={0}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="A walk from the street to the Bahi Hut door"
+      className="walk relative w-full aspect-[4/5] md:aspect-[16/9] overflow-hidden bg-[hsl(20_40%_6%)] outline-none touch-pan-y select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="walk-camera absolute inset-0">
+        {FRAMES.map((frame, i) => {
+          const [fx, fy] = frame.focus.split(' ');
+          const active = i === index;
+          // Shortest circular distance from the active slide, so the carousel wraps both ways.
+          const delta = (((i - index + FRAMES.length / 2) % FRAMES.length) + FRAMES.length) % FRAMES.length - FRAMES.length / 2;
+          // Neighbors sit just off-stage so a swipe-in-progress shows a sliver of the next photo.
+          if (Math.abs(delta) > 1) return null;
+          const offset = delta + dragPct / 100;
+          return (
+            <div
+              key={frame.src}
+              data-on={active ? 'true' : 'false'}
+              className="walk-photo absolute inset-0"
+              style={{ '--shown': active ? 1 : 0, transform: `translateX(${offset * 100}%)` } as CSSProperties}
+            >
+              {/* Sized like object-fit: cover, so the lights stay on their bulbs. */}
               <div
-                key={frame.src}
-                ref={(el) => {
-                  photoRefs.current[i] = el;
-                }}
-                data-on={i === 0 ? 'true' : 'false'}
-                className="walk-photo absolute inset-0"
+                className="walk-cover"
+                style={{ '--ar': frame.aspect, '--fx': fx, '--fy': fy, '--push': active ? 1 : 0 } as CSSProperties}
               >
-                {/* Sized like object-fit: cover, so the lights stay on their bulbs. */}
-                <div className="walk-cover" style={{ '--ar': frame.aspect, '--fx': fx, '--fy': fy } as CSSProperties}>
-                  <img
-                    src={frame.src}
-                    alt={frame.alt}
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    className="absolute inset-0 w-full h-full"
-                  />
-                  <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
-                    {frame.glows?.map((g, gi) => (
+                <img
+                  src={frame.src}
+                  alt={frame.alt}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  className="absolute inset-0 w-full h-full"
+                />
+                <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+                  {frame.glows?.map((g, gi) => (
+                    <span
+                      key={`g${gi}`}
+                      className="walk-glow"
+                      data-kind={g.kind}
+                      style={
+                        {
+                          left: `${g.x}%`,
+                          top: `${g.y}%`,
+                          width: `${g.w}%`,
+                          height: `${g.h}%`,
+                          '--c': g.hue,
+                          '--d': `${-gi * 1.7}s`,
+                        } as CSSProperties
+                      }
+                    />
+                  ))}
+                  {frame.glints?.flatMap((set, si) =>
+                    set.points.map(([x, y], pi) => (
                       <span
-                        key={`g${gi}`}
-                        className="walk-glow"
-                        data-kind={g.kind}
+                        key={`${si}-${pi}`}
+                        className="walk-glint"
+                        data-flare={set.flareEvery && pi % set.flareEvery === 0 ? 'true' : undefined}
                         style={
                           {
-                            left: `${g.x}%`,
-                            top: `${g.y}%`,
-                            width: `${g.w}%`,
-                            height: `${g.h}%`,
-                            '--c': g.hue,
-                            '--d': `${-gi * 1.7}s`,
+                            left: `${x}%`,
+                            top: `${y}%`,
+                            '--c': set.hue,
+                            '--s': `${set.size * (0.75 + rand(pi + si * 50) * 0.5)}rem`,
+                            '--t': `${1.8 + rand(pi + 7) * 2.6}s`,
+                            '--d': `${-rand(pi + 13) * 4}s`,
                           } as CSSProperties
                         }
                       />
-                    ))}
-                    {frame.glints?.flatMap((set, si) =>
-                      set.points.map(([x, y], pi) => (
-                        <span
-                          key={`${si}-${pi}`}
-                          className="walk-glint"
-                          data-flare={set.flareEvery && pi % set.flareEvery === 0 ? 'true' : undefined}
-                          style={
-                            {
-                              left: `${x}%`,
-                              top: `${y}%`,
-                              '--c': set.hue,
-                              '--s': `${set.size * (0.75 + rand(pi + si * 50) * 0.5)}rem`,
-                              '--t': `${1.8 + rand(pi + 7) * 2.6}s`,
-                              '--d': `${-rand(pi + 13) * 4}s`,
-                            } as CSSProperties
-                          }
-                        />
-                      )),
-                    )}
-                  </div>
+                    )),
+                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+      </div>
 
-        <div aria-hidden="true" className="walk-leak absolute z-[1] pointer-events-none" />
-        <div aria-hidden="true" className="walk-bokeh absolute inset-x-0 z-[1] pointer-events-none">
-          {BOKEH.map((b, i) => (
-            <span
-              key={i}
-              style={
-                {
-                  left: `${b.x}%`,
-                  top: `${b.y}%`,
-                  '--s': `${b.size}rem`,
-                  '--z': b.depth,
-                  '--a': b.alpha,
-                  '--t': `${b.drift}s`,
-                  '--d': `${b.delay}s`,
-                } as CSSProperties
-              }
-            />
-          ))}
-        </div>
+      <div
+        aria-hidden="true"
+        className="walk-bokeh absolute inset-x-0 z-[1] pointer-events-none"
+        style={{ '--glow-h': FRAMES[index].hue } as CSSProperties}
+      >
+        {BOKEH.map((b, i) => (
+          <span
+            key={i}
+            style={
+              {
+                left: `${b.x}%`,
+                top: `${b.y}%`,
+                '--s': `${b.size}rem`,
+                '--z': b.depth,
+                '--a': b.alpha,
+                '--t': `${b.drift}s`,
+                '--d': `${b.delay}s`,
+              } as CSSProperties
+            }
+          />
+        ))}
+      </div>
 
-        <div aria-hidden="true" className="walk-shade absolute inset-0 z-[1] pointer-events-none" />
-        <div aria-hidden="true" className="story-grain absolute z-[2] pointer-events-none" />
+      <div aria-hidden="true" className="walk-shade absolute inset-0 z-[1] pointer-events-none" />
+      <div aria-hidden="true" className="story-grain absolute z-[2] pointer-events-none" />
 
-        <div className="absolute inset-0 z-10 pointer-events-none">
-          <div className="container mx-auto px-4 h-full grid">
-            {FRAMES.map((frame, i) => (
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        <div className="container mx-auto px-4 h-full grid">
+          {FRAMES.map((frame, i) => {
+            const active = i === index;
+            return (
               <div
                 key={frame.src}
-                ref={(el) => {
-                  captionRefs.current[i] = el;
-                }}
-                className="story-beat [grid-area:1/1] self-end pb-24 md:pb-28 max-w-xl"
+                className="story-beat [grid-area:1/1] self-end pb-24 md:pb-28 max-w-xl transition-opacity duration-500"
+                style={
+                  {
+                    opacity: active ? 1 : 0,
+                    '--enter': active ? 1 : 0,
+                    '--exit': 0,
+                    '--local': 1,
+                  } as CSSProperties
+                }
+                aria-hidden={!active}
               >
                 <h2 className="font-serif font-light text-white text-4xl md:text-6xl leading-[1.04] tracking-[-0.01em]">
                   {frame.lines.map((line, li) => {
                     const glow = frame.glow && li === frame.lines.length - 1;
                     return (
-                      <span key={li} className="beat-line" style={{ '--i': li } as CSSProperties}>
+                      <span key={li} className="beat-line" style={{ '--i': active ? li : 0 } as CSSProperties}>
                         <span
                           className={glow ? 'beat-glow' : undefined}
                           style={glow ? ({ '--c': frame.glow } as CSSProperties) : undefined}
@@ -509,22 +423,48 @@ export default function WalkInSequence() {
                   </div>
                 )}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Frame counter, like a slate in the corner of the shot. */}
-        <div aria-hidden="true" className="absolute bottom-6 md:bottom-8 right-4 md:right-8 z-20 flex items-center gap-3 text-white/70 text-xs md:text-sm tracking-[0.2em] tabular-nums">
-          <span className="walk-count">
-            {FRAMES.map((_, i) => (
-              <span key={i} data-n={i}>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-            ))}
-          </span>
-          <span className="walk-bar" />
-          <span>{String(FRAMES.length).padStart(2, '0')}</span>
-        </div>
+      {/* Carousel controls. */}
+      <button
+        type="button"
+        onClick={goPrev}
+        aria-label="Previous photo"
+        className="walk-nav absolute left-3 md:left-6 top-1/2 z-20 -translate-y-1/2 grid place-items-center rounded-full"
+      >
+        <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+      </button>
+      <button
+        type="button"
+        onClick={goNext}
+        aria-label="Next photo"
+        className="walk-nav absolute right-3 md:right-6 top-1/2 z-20 -translate-y-1/2 grid place-items-center rounded-full"
+      >
+        <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+      </button>
+
+      <div className="absolute bottom-6 md:bottom-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2.5">
+        {FRAMES.map((frame, i) => (
+          <button
+            key={frame.src}
+            type="button"
+            onClick={() => goTo(i)}
+            aria-label={`Go to photo ${i + 1} of ${FRAMES.length}`}
+            aria-current={i === index}
+            className="walk-dot"
+            data-active={i === index}
+          />
+        ))}
+      </div>
+
+      {/* Frame counter, like a slate in the corner of the shot. */}
+      <div aria-hidden="true" className="absolute bottom-6 md:bottom-8 right-4 md:right-8 z-20 flex items-center gap-3 text-white/70 text-xs md:text-sm tracking-[0.2em] tabular-nums">
+        <span>{String(index + 1).padStart(2, '0')}</span>
+        <span className="walk-bar" style={{ '--walk': (index + 1) / FRAMES.length } as CSSProperties} />
+        <span>{String(last + 1).padStart(2, '0')}</span>
       </div>
     </div>
   );
