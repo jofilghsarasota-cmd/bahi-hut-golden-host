@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Pause, Play } from 'lucide-react';
-import heroVideo from '@assets/generated_images/hero-tiki-60.mp4';
+import heroVideo from '@assets/gemini_generated_video_4e714eb2.mp4';
 import heroPoster from '@assets/generated_images/hero-tiki-poster.jpg';
 import loungeVideo from '@assets/generated_images/lounge-60.mp4';
 import loungePoster from '@assets/generated_images/lounge-poster.jpg';
@@ -26,9 +26,9 @@ const LOUNGE_POSTER = loungePoster;
 
 // Timeline, in ms.
 const INTRO_HOLD_MS = 1000;
-// Match the playable video lengths (hero-tiki-60 5.83s, lounge-60 13.73s,
-// less maxTime's end margin) so playbackRate stays at ~1.
-const HERO_PLAY_MS = 5780;
+// Match the playable video lengths (hero 10.0s, lounge-60 13.73s, less
+// maxTime's end margin) so playbackRate stays at ~1.
+const HERO_PLAY_MS = 9950;
 const HERO_HOLD_MS = 5500;
 const LOUNGE_PLAY_MS = 13680;
 // The bar hold, including the fade to dusk before the loop restarts.

@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -17,9 +17,30 @@ import LocalGuide from '@/pages/local-guide';
 
 const queryClient = new QueryClient();
 
+function ScrollToTop() {
+  const [location] = useLocation();
+  const prevLocation = useRef(location);
+
+  useEffect(() => {
+    if (prevLocation.current === location) return;
+    prevLocation.current = location;
+
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => void };
+    if (doc.startViewTransition) {
+      doc.startViewTransition(() => {
+        window.scrollTo(0, 0);
+      });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location]);
+  return null;
+}
+
 function Router() {
   return (
     <Shell>
+      <ScrollToTop />
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/bahi-hut" component={BahiHut} />

@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, Palmtree, Calendar, ShoppingBag, GlassWater, BedDouble, Info, Map, Phone } from 'lucide-react';
 import { SiteFooter } from '@/components/site-footer';
 import { ScrollProgressIcon } from '@/components/scroll-progress-icon';
+import { CookieConsent } from '@/components/cookie-consent';
 import { Button } from '@/components/ui/button';
+import { BookARoomButton } from '@/components/book-a-room-button';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -41,6 +43,41 @@ function navLinkClass(active: boolean, overlaid: boolean) {
     'after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:origin-left after:rounded-full after:bg-primary after:transition-transform after:duration-300 motion-reduce:after:transition-none',
     active ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100',
     overlaid ? 'text-white/85 hover:text-white' : active ? 'text-foreground' : 'text-foreground/70 hover:text-foreground',
+  );
+}
+
+function MobileStickyCtA() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="mobile-cta-enter fixed bottom-4 inset-x-4 z-40 flex gap-2 lg:hidden">
+      <BookARoomButton
+        href={BOOKING_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        size="lg"
+        className="flex-1 shadow-lg shadow-primary/30"
+      />
+      <Button size="lg" variant="glass" className="shadow-lg" asChild>
+        <a href="tel:9413555141">
+          <Phone className="w-4 h-4" />
+        </a>
+      </Button>
+    </div>
   );
 }
 
@@ -144,7 +181,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <Button asChild>
+            <Button asChild className="font-bold tracking-wide rounded-full px-6">
               <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
                 Book a Room
               </a>
@@ -188,7 +225,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </nav>
               <div className="grid gap-3 border-t border-border p-6">
                 <SheetClose asChild>
-                  <Button asChild size="lg" className="w-full">
+                  <Button asChild size="lg" className="w-full font-bold tracking-wide rounded-full">
                     <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
                       Book a Room
                     </a>
@@ -214,6 +251,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       <SiteFooter />
       <ScrollProgressIcon />
+      <CookieConsent />
+      <MobileStickyCtA />
     </div>
   );
 }

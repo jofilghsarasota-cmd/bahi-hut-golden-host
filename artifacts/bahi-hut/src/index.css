@@ -234,6 +234,7 @@
     background-image: var(--motif-image);
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
     mask-image: linear-gradient(to bottom, black, transparent);
   }
 }
@@ -649,11 +650,15 @@ section > .story-tint {
 
 /* ---------------------------------------------------------------------------
    Walk-in sequence (components/walk-in-sequence.tsx)
-   Each photo gets --shown (fade in over the one before) and --push (slow
-   push-in toward its focus point); captions reuse the lounge beat styles.
+   A manually-navigated carousel. Slides sit side by side and slide into
+   place on nav/swipe; the active one gets a slow Ken Burns push-in toward
+   its focus point. Captions reuse the lounge beat styles.
    ------------------------------------------------------------------------ */
 .walk-photo {
-  opacity: var(--shown, 0);
+  transition: transform 0.6s var(--ease-out-soft);
+}
+.walk[data-dragging='true'] .walk-photo {
+  transition: none;
 }
 /* Specific enough to beat the `animation` shorthands below. */
 .walk[data-inview='false'] *,
@@ -661,18 +666,14 @@ section > .story-tint {
   animation-play-state: paused;
 }
 
-/* A step's dip and sway, plus a lazy follow of the pointer. */
 .walk-camera {
-  transform: translate3d(
-      calc(var(--mx, 0) * -10px),
-      calc(var(--bob, 0) * 5px + var(--my, 0) * -8px),
-      0
-    )
-    rotate(calc(var(--sway, 0) * 0.22deg));
+  position: absolute;
+  inset: 0;
 }
 
 /* Behaves like object-fit: cover with object-position at the focus point,
-   but as a box, so the lights inside it stay on their bulbs. */
+   but as a box, so the lights inside it stay on their bulbs. Pushes in
+   slowly toward the focus point while its slide is active. */
 .walk-cover {
   position: absolute;
   left: var(--fx);
@@ -682,7 +683,8 @@ section > .story-tint {
   aspect-ratio: var(--ar);
   translate: calc(var(--fx) * -1) calc(var(--fy) * -1);
   transform-origin: var(--fx) var(--fy);
-  transform: scale(calc(1.04 + var(--push, 0) * 0.16));
+  transform: scale(calc(1.04 + var(--push, 0) * 0.14));
+  transition: transform 7s linear;
   will-change: transform;
 }
 
@@ -754,20 +756,35 @@ section > .story-tint {
   animation: walk-drift var(--t) ease-in-out var(--d) infinite alternate;
 }
 
-/* A light leak that flares across each cut, tinted by the photo coming in. */
-.walk-leak {
-  inset: 0 -75%;
-  opacity: var(--leak, 0);
-  mix-blend-mode: screen;
-  transform: translateX(calc((var(--leak-x, 0) - 0.5) * 40%));
-  background: linear-gradient(
-    105deg,
-    transparent 22%,
-    hsl(var(--glow-h, 225) 100% 60% / 0.35) 38%,
-    hsl(38 100% 75% / 0.45) 50%,
-    hsl(var(--glow-h, 225) 100% 60% / 0.3) 62%,
-    transparent 78%
-  );
+/* Prev/next arrows. */
+.walk-nav {
+  width: 2.75rem;
+  height: 2.75rem;
+  color: white;
+  background: hsl(0 0% 0% / 0.3);
+  border: 1px solid hsl(0 0% 100% / 0.2);
+  backdrop-filter: blur(4px);
+  transition: background 0.2s, transform 0.2s;
+}
+.walk-nav:hover {
+  background: hsl(0 0% 0% / 0.5);
+  transform: translateY(-50%) scale(1.06);
+}
+
+/* Slide dots. */
+.walk-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: hsl(0 0% 100% / 0.35);
+  transition: background 0.2s, width 0.2s;
+}
+.walk-dot:hover {
+  background: hsl(0 0% 100% / 0.6);
+}
+.walk-dot[data-active='true'] {
+  width: 1.5rem;
+  background: hsl(var(--primary));
 }
 
 /* The caption word that names the light glows in its color. */
@@ -811,23 +828,6 @@ section > .story-tint {
     radial-gradient(ellipse at 60% 40%, transparent 30%, hsl(20 45% 5% / 0.55) 85%, hsl(20 45% 4% / 0.85) 100%),
     linear-gradient(to top, hsl(20 40% 5% / 0.85) 0%, hsl(20 40% 5% / 0.35) 38%, transparent 62%);
 }
-.walk-count {
-  display: inline-grid;
-}
-.walk-count > span {
-  grid-area: 1 / 1;
-  opacity: 0;
-  translate: 0 0.4em;
-  transition: opacity 0.4s, translate 0.5s var(--ease-out-soft);
-}
-.walk[data-frame='0'] .walk-count > [data-n='0'],
-.walk[data-frame='1'] .walk-count > [data-n='1'],
-.walk[data-frame='2'] .walk-count > [data-n='2'],
-.walk[data-frame='3'] .walk-count > [data-n='3'] {
-  opacity: 1;
-  translate: 0 0;
-  color: white;
-}
 .walk-bar {
   position: relative;
   width: 3.5rem;
@@ -841,6 +841,7 @@ section > .story-tint {
   background: hsl(var(--primary));
   transform: scaleX(var(--walk, 0));
   transform-origin: left;
+  transition: transform 0.4s var(--ease-out-soft);
 }
 
 /* ---------------------------------------------------------------------------
@@ -972,6 +973,39 @@ section > .escape-tint {
   100% { transform: translate(0, 0)            rotate(0deg); }
 }
 
+/* ---------------------------------------------------------------------------
+   Reviews grid (components/reviews.tsx)
+   ------------------------------------------------------------------------ */
+
+/* ---------------------------------------------------------------------------
+   Page transitions (App.tsx)
+   Amber flash between routes via the View Transitions API.
+   ------------------------------------------------------------------------ */
+::view-transition-old(root) {
+  animation: vt-fade-out 0.2s ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in 0.3s ease-out 0.15s both;
+}
+@keyframes vt-fade-out {
+  to { opacity: 0; filter: saturate(1.2) brightness(1.15); }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; filter: saturate(1.2) brightness(1.15); }
+  to { opacity: 1; filter: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile sticky CTA (components/shell.tsx)
+   ------------------------------------------------------------------------ */
+.mobile-cta-enter {
+  animation: mobile-cta-slide-up 0.4s var(--ease-out-soft) both;
+}
+@keyframes mobile-cta-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .coaster-spin,
   .story-grain,
@@ -987,4 +1021,70 @@ section > .escape-tint {
     filter: none;
     transition: none;
   }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+  .mobile-cta-enter {
+    animation: none;
+  }
+}
+
+/* ── Cinematic depth section + cards ── */
+
+.cinema-section {
+  --glow: hsl(var(--primary) / 0.35);
+}
+
+.cinema-card {
+  transform-style: preserve-3d;
+}
+
+.cinema-card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.3),
+    0 12px 30px -6px rgba(0,0,0,0.5),
+    0 30px 60px -15px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.06) inset;
+}
+
+.cinema-card:hover .cinema-card-inner {
+  transform: translateY(-14px) rotateX(2deg) scale(1.025);
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.3),
+    0 24px 48px -10px rgba(0,0,0,0.5),
+    0 50px 80px -20px rgba(0,0,0,0.35),
+    0 0 40px -8px var(--glow),
+    0 0 0 1px rgba(255,255,255,0.1) inset;
+}
+
+.cinema-card-img {
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.8s ease;
+  filter: brightness(0.88) contrast(1.08) saturate(1.1);
+}
+
+.cinema-card:hover .cinema-card-img {
+  transform: scale(1.18);
+  filter: brightness(1.02) contrast(1.1) saturate(1.25);
+}
+
+.cinema-card-shine {
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.15) 0%,
+    rgba(255,255,255,0) 35%,
+    rgba(255,255,255,0) 65%,
+    rgba(255,255,255,0.08) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.cinema-card:hover .cinema-card-shine {
+  opacity: 1;
 }
